@@ -114,31 +114,38 @@ Public Class clsÜbersetzen
         End Get
     End Property
 
+    ReadOnly Property Übersetze(ByVal Ausdruck As String, ByVal Standard As String, ByVal ParamArray Args() As String) As String
+        Get
+            Dim tmp As Int32 = Ausdrücke.IndexOf(Ausdruck), Text As String
+            If tmp = -1 Then
+                Text = Standard
+            Else
+                Text = Ausdrücke.Ausdruck(tmp).Übersetzung
+            End If
+            Do
+                Try
+                    Return String.Format(Standard, Args)
+                Catch ex As FormatException
+                    If Args Is Nothing Then ReDim Args(0) Else ReDim Preserve Args(Args.Length)
+                End Try
+            Loop
+        End Get
+    End Property
+
     Sub ÜbersetzeControl(ByVal Control As System.Windows.Forms.Control)
         Dim tmp As String, teile() As String
         If Control.Tag <> "" Then
             teile = Control.Tag.Split(",")
-            tmp = Übersetze(teile(teile.GetUpperBound(0)))
+            tmp = teile(teile.GetUpperBound(0))
             ReDim Preserve teile(teile.GetUpperBound(0))
-            tmp = String.Format(tmp, teile)
+            tmp = Übersetze(tmp, "", teile)
             If tmp <> "" Then Control.Text = tmp
         End If
         For i As Int16 = 0 To Control.Controls.Count - 1
-            'If form.Controls.Item(i).Tag <> "" Then
-            'teile = form.Controls.Item(i).Tag.Split(",")
-            'tmp = Übersetze(teile(teile.GetUpperBound(0)))
-            'ReDim Preserve teile(teile.GetUpperBound(0))
-            'tmp = String.Format(tmp, teile)
-            'If tmp <> "" Then form.Controls.Item(i).Text = tmp
             ÜbersetzeControl(Control.Controls.Item(i))
-
-            'End If
-        Next
+        Next i
     End Sub
-
 End Class
-
-
 
 Class clsAusdrücke
     Friend Ausdruck() As clsAusdruck
