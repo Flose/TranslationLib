@@ -1,12 +1,3 @@
-D:\Dokumente und Einstellungen\Flose\Eigene Dateien\Visual Studio 2005\Projects\dllSprache\bin\Debug\dllSprache.dll
-D:\Dokumente und Einstellungen\Flose\Eigene Dateien\Visual Studio 2005\Projects\dllSprache\bin\Debug\dllSprache.pdb
-D:\Dokumente und Einstellungen\Flose\Eigene Dateien\Visual Studio 2005\Projects\dllSprache\bin\Debug\dllSprache.xml
-D:\Dokumente und Einstellungen\Flose\Eigene Dateien\Visual Studio 2005\Projects\dllSprache\obj\Debug\ResolveAssemblyReference.cache
-D:\Dokumente und Einstellungen\Flose\Eigene Dateien\Visual Studio 2005\Projects\dllSprache\obj\Debug\dllSprache.Resources.resources
-D:\Dokumente und Einstellungen\Flose\Eigene Dateien\Visual Studio 2005\Projects\dllSprache\obj\Debug\dllSprache.vbproj.GenerateResource.Cache
-D:\Dokumente und Einstellungen\Flose\Eigene Dateien\Visual Studio 2005\Projects\dllSprache\obj\Debug\dllSprache.dll
-D:\Dokumente und Einstellungen\Flose\Eigene Dateien\Visual Studio 2005\Projects\dllSprache\obj\Debug\dllSprache.xml
-D:\Dokumente und Einstellungen\Flose\Eigene Dateien\Visual Studio 2005\Projects\dllSprache\obj\Debug\dllSprache.pdb
 D:\Dokumente und Einstellungen\Flose\Eigene Dateien\Visual Studio 2005\Projects\dllSprache\bin\Release\dllSprache.dll
 D:\Dokumente und Einstellungen\Flose\Eigene Dateien\Visual Studio 2005\Projects\dllSprache\bin\Release\dllSprache.pdb
 D:\Dokumente und Einstellungen\Flose\Eigene Dateien\Visual Studio 2005\Projects\dllSprache\bin\Release\dllSprache.xml

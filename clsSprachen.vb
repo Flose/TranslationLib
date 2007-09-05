@@ -2,6 +2,7 @@ Public Class clsÜbersetzen
     Dim Ausdrücke As New clsAusdrücke
     Public Sprachen() As String
     Dim SprachenPfad As String
+    Dim AktuelleSprache As String
 
     Function Load(ByVal Sprache As String) As Boolean
         If System.IO.File.Exists(SprachenPfad & "\" & Sprache & ".lng") Then
@@ -25,7 +26,7 @@ Public Class clsÜbersetzen
             Catch
                 If Reader IsNot Nothing Then Reader.Close()
             End Try
-            If Ausdrücke.Count > 0 Then Return True Else Return False
+            If Ausdrücke.Count > 0 Then AktuelleSprache = Sprache : Return True Else Return False
         Else
             Return False
         End If
@@ -145,6 +146,31 @@ Public Class clsÜbersetzen
             ÜbersetzeControl(Control.Controls.Item(i))
         Next i
     End Sub
+
+    Function GetAufzählungVon(ByVal Zahl As Int32) As String
+        Select Case AktuelleSprache.ToLower
+            Case "french"
+                Select Case Zahl
+                    Case 1
+                        Return "1ère"
+                    Case Else
+                        Return Zahl & "ième"
+                End Select
+            Case "english"
+                Select Case Zahl
+                    Case 1
+                        Return "1st"
+                    Case 2
+                        Return "2nd"
+                    Case 3
+                        Return "3rd"
+                    Case Else
+                        Return Zahl & "th"
+                End Select
+            Case Else
+                Return Zahl & "."
+        End Select
+    End Function
 End Class
 
 Class clsAusdrücke
