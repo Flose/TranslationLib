@@ -152,9 +152,16 @@ Public Class cls‹bersetzen
             End If
             Select Case Control.GetType.ToString.ToLower
                 Case "system.windows.forms.listview"
-                    Dim tmpListView As System.Windows.Forms.ListView = Control
-                    For i As Int16 = 0 To tmpListView.Columns.Count - 1
-                        ‹bersetzeControl(tmpListView.Columns(i))
+                    For i As Int16 = 0 To Control.Columns.Count - 1
+                        ‹bersetzeControl(Control.Columns(i))
+                    Next i
+                Case "system.windows.forms.toolstrip", "system.windows.forms.menustrip"
+                    For i As Int16 = 0 To Control.Items.Count - 1
+                        ‹bersetzeControl(Control.Items(i))
+                    Next i
+                Case "system.windows.forms.toolstripmenuitem"
+                    For i As Int16 = 0 To Control.dropdownItems.Count - 1
+                        ‹bersetzeControl(Control.dropdownItems(i))
                     Next i
                 Case Else
                     For i As Int16 = 0 To Control.Controls.Count - 1
