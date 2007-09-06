@@ -123,28 +123,46 @@ Public Class clsÜbersetzen
             Else
                 Text = Ausdrücke.Ausdruck(tmp).Übersetzung
             End If
+            If Args IsNot Nothing Then
+                For i As Int16 = 0 To Args.GetUpperBound(0)
+                    If Args(i).Length >= 3 AndAlso Args(i).Substring(0, 2) = "##" AndAlso IsNumeric(Args(i).Substring(2).Trim) Then Args(i) = GetAufzählungVon(Args(i).Substring(2).Trim)
+                Next i
+            End If
             Do
                 Try
-                    Return String.Format(Standard, Args)
+                    Return String.Format(Text, Args)
                 Catch ex As FormatException
                     If Args Is Nothing Then ReDim Args(0) Else ReDim Preserve Args(Args.Length)
+                Catch ex As ArgumentNullException
+                    ReDim Args(0)
                 End Try
             Loop
         End Get
     End Property
 
-    Sub ÜbersetzeControl(ByVal Control As System.Windows.Forms.Control)
-        Dim tmp As String, teile() As String
-        If Control.Tag <> "" Then
-            teile = Control.Tag.Split(",")
-            tmp = teile(teile.GetUpperBound(0))
-            ReDim Preserve teile(teile.GetUpperBound(0))
-            tmp = Übersetze(tmp, "", teile)
-            If tmp <> "" Then Control.Text = tmp
-        End If
-        For i As Int16 = 0 To Control.Controls.Count - 1
-            ÜbersetzeControl(Control.Controls.Item(i))
-        Next i
+    Sub ÜbersetzeControl(ByVal Control As Object)
+        Try
+            Dim tmp As String, teile() As String
+            If Control.Tag <> "" Then
+                teile = Control.Tag.Split(",")
+                tmp = teile(teile.GetUpperBound(0))
+                ReDim Preserve teile(teile.GetUpperBound(0) - 1)
+                tmp = Übersetze(tmp, "", teile)
+                If tmp <> "" Then Control.Text = tmp
+            End If
+            Select Case Control.GetType.ToString.ToLower
+                Case "system.windows.forms.listview"
+                    Dim tmpListView As System.Windows.Forms.ListView = Control
+                    For i As Int16 = 0 To tmpListView.Columns.Count - 1
+                        ÜbersetzeControl(tmpListView.Columns(i))
+                    Next i
+                Case Else
+                    For i As Int16 = 0 To Control.Controls.Count - 1
+                        ÜbersetzeControl(Control.Controls.Item(i))
+                    Next i
+            End Select
+        Catch
+        End Try
     End Sub
 
     Function GetAufzählungVon(ByVal Zahl As Int32) As String
