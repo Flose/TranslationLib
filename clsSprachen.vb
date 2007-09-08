@@ -1,6 +1,6 @@
 Public Class clsÜbersetzen
     Dim Ausdrücke As New clsAusdrücke
-    Public Sprachen() As String
+    Public Sprachen() As String, SprachenNamen() As String
     Dim SprachenPfad As String
     Dim AktuelleSprache As String
 
@@ -51,7 +51,7 @@ Public Class clsÜbersetzen
         Return ""
     End Function
 
-    Function ÜberprüfeDatei(ByVal SprachDatei As String) As Boolean
+    Function ÜberprüfeDatei(ByVal SprachDatei As String, Optional ByRef SprachenName As String = "") As Boolean
         If System.IO.File.Exists(SprachDatei) Then
             Dim Reader As System.IO.StreamReader
             Try
@@ -62,10 +62,11 @@ Public Class clsÜbersetzen
                     Try
                         tmpstring = Reader.ReadLine
                         tmp = tmpstring.IndexOf("=")
-                        tmpstring.Substring(0, tmp)
-                        tmpstring.Substring(tmp + 1)
-                        Reader.Close()
-                        Return True
+                        If tmpstring.Substring(0, tmp).ToLower.Trim = "sprachenname" Then
+                            SprachenName = tmpstring.Substring(tmp + 1)
+                            Reader.Close()
+                            Return True
+                        End If
                     Catch
                     End Try
                 Loop
@@ -80,18 +81,45 @@ Public Class clsÜbersetzen
     End Function
 
     Sub New(ByVal Directory As String)
+        Dim tmp As String
         SprachenPfad = Directory
         For Each File As String In System.IO.Directory.GetFiles(SprachenPfad, "*.lng", IO.SearchOption.TopDirectoryOnly)
-            If ÜberprüfeDatei(File) Then
+            tmp = ""
+            If ÜberprüfeDatei(File, tmp) Then
                 If Sprachen Is Nothing Then
                     ReDim Sprachen(0)
+                    ReDim SprachenNamen(0)
                 Else
                     ReDim Preserve Sprachen(Sprachen.Length)
+                    ReDim Preserve SprachenNamen(SprachenNamen.Length)
                 End If
                 Sprachen(Sprachen.GetUpperBound(0)) = System.IO.Path.GetFileNameWithoutExtension(File)
+                SprachenNamen(SprachenNamen.GetUpperBound(0)) = tmp
             End If
         Next
     End Sub
+
+    ReadOnly Property RückÜbersetzen(ByVal Übersetzung As String) As String
+        Get
+            Dim tmp As Int32 = Ausdrücke.IndexOfÜbersetzung(Übersetzung)
+            If tmp = -1 Then
+                Return ""
+            Else
+                Return Ausdrücke.Ausdruck(tmp).Ausdruck
+            End If
+        End Get
+    End Property
+
+    ReadOnly Property RückÜbersetzen(ByVal Übersetzung As String, ByVal Standard As String) As String
+        Get
+            Dim tmp As Int32 = Ausdrücke.IndexOfÜbersetzung(Übersetzung)
+            If tmp = -1 Then
+                Return Standard
+            Else
+                Return Ausdrücke.Ausdruck(tmp).Ausdruck
+            End If
+        End Get
+    End Property
 
     ReadOnly Property Übersetze(ByVal Ausdruck As String) As String
         Get
@@ -204,6 +232,15 @@ Class clsAusdrücke
     Function IndexOf(ByVal Ausdruck As String) As Int32
         For i As Int32 = 0 To Count - 1
             If String.Compare(Me.Ausdruck(i).Ausdruck, Ausdruck, True) = 0 Then
+                Return i
+            End If
+        Next i
+        Return -1
+    End Function
+
+    Function IndexOfÜbersetzung(ByVal Übersetzung As String) As Int32
+        For i As Int32 = 0 To Count - 1
+            If String.Compare(Me.Ausdruck(i).Übersetzung, Übersetzung, True) = 0 Then
                 Return i
             End If
         Next i
