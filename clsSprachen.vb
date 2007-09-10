@@ -1,7 +1,7 @@
 Public Class clsÜbersetzen
     Dim Ausdrücke As New clsAusdrücke
     Public Sprachen() As String, SprachenNamen() As String
-    Dim SprachenPfad As String
+    Public SprachenPfad As String
     Dim AktuelleSprache As String
 
     Function Load(ByVal Sprache As String) As Boolean
@@ -33,15 +33,14 @@ Public Class clsÜbersetzen
     End Function
 
     Function ÜberprüfeSprache(ByVal Sprache As String) As String
-        If Not ÜberprüfeDatei(SprachenPfad & "\" & Sprache & ".lng") Then
+        If Sprachen Is Nothing OrElse Array.IndexOf(Sprachen, Sprache) = -1 Then
             Sprache = My.Application.Culture.EnglishName.Substring(0, My.Application.Culture.EnglishName.IndexOf(" ("))
-            If Not ÜberprüfeDatei(SprachenPfad & "\" & Sprache & ".lng") Then
-                For Each File As String In System.IO.Directory.GetFiles(SprachenPfad, "*.lng", IO.SearchOption.TopDirectoryOnly)
-                    If ÜberprüfeDatei(File) Then
-                        Sprache = System.IO.Path.GetFileNameWithoutExtension(File)
-                        Return Sprache
-                    End If
-                Next
+            If Sprachen Is Nothing OrElse Array.IndexOf(Sprachen, Sprache) = -1 Then
+                If Sprachen IsNot Nothing AndAlso Sprachen.Length > 0 Then
+                    Return Sprachen(0)
+                Else
+                    Return ""
+                End If
             Else
                 Return Sprache
             End If
@@ -83,20 +82,22 @@ Public Class clsÜbersetzen
     Sub New(ByVal Directory As String)
         Dim tmp As String
         SprachenPfad = Directory
-        For Each File As String In System.IO.Directory.GetFiles(SprachenPfad, "*.lng", IO.SearchOption.TopDirectoryOnly)
-            tmp = ""
-            If ÜberprüfeDatei(File, tmp) Then
-                If Sprachen Is Nothing Then
-                    ReDim Sprachen(0)
-                    ReDim SprachenNamen(0)
-                Else
-                    ReDim Preserve Sprachen(Sprachen.Length)
-                    ReDim Preserve SprachenNamen(SprachenNamen.Length)
+        If System.IO.Directory.Exists(SprachenPfad) Then
+            For Each File As String In System.IO.Directory.GetFiles(SprachenPfad, "*.lng", IO.SearchOption.TopDirectoryOnly)
+                tmp = ""
+                If ÜberprüfeDatei(File, tmp) Then
+                    If Sprachen Is Nothing Then
+                        ReDim Sprachen(0)
+                        ReDim SprachenNamen(0)
+                    Else
+                        ReDim Preserve Sprachen(Sprachen.Length)
+                        ReDim Preserve SprachenNamen(SprachenNamen.Length)
+                    End If
+                    Sprachen(Sprachen.GetUpperBound(0)) = System.IO.Path.GetFileNameWithoutExtension(File)
+                    SprachenNamen(SprachenNamen.GetUpperBound(0)) = tmp
                 End If
-                Sprachen(Sprachen.GetUpperBound(0)) = System.IO.Path.GetFileNameWithoutExtension(File)
-                SprachenNamen(SprachenNamen.GetUpperBound(0)) = tmp
-            End If
-        Next
+            Next
+        End If
     End Sub
 
     ReadOnly Property RückÜbersetzen(ByVal Übersetzung As String) As String
@@ -210,13 +211,13 @@ Public Class clsÜbersetzen
                         Return Zahl & "ième"
                 End Select
             Case "english"
-                Select Case Zahl
+                Select Case CStr(Zahl).Substring(CStr(Zahl).Length - 1)
                     Case 1
-                        Return "1st"
+                        Return Zahl & "st"
                     Case 2
-                        Return "2nd"
+                        Return Zahl & "nd"
                     Case 3
-                        Return "3rd"
+                        Return Zahl & "rd"
                     Case Else
                         Return Zahl & "th"
                 End Select
