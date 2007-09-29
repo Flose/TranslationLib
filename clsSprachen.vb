@@ -7,7 +7,7 @@ Public Class clsÜbersetzen
     Function Load(ByVal Sprache As String) As Boolean
         If System.IO.File.Exists(SprachenPfad & "\" & Sprache & ".lng") Then
             Ausdrücke.Ausdruck = Nothing
-            Dim Reader As System.IO.StreamReader
+            Dim Reader As System.IO.StreamReader = Nothing
             Try
                 Reader = New System.IO.StreamReader(SprachenPfad & "\" & Sprache & ".lng", True)
                 Dim Version As String = Reader.ReadLine()
@@ -52,7 +52,7 @@ Public Class clsÜbersetzen
 
     Function ÜberprüfeDatei(ByVal SprachDatei As String, Optional ByRef SprachenName As String = "") As Boolean
         If System.IO.File.Exists(SprachDatei) Then
-            Dim Reader As System.IO.StreamReader
+            Dim Reader As System.IO.StreamReader = Nothing
             Try
                 Reader = New System.IO.StreamReader(SprachDatei, True)
                 Reader.ReadLine()
