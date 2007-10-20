@@ -125,7 +125,7 @@ Public Class clsÜbersetzen
     ReadOnly Property Übersetze(ByVal Ausdruck As String) As String
         Get
             Dim tmp As Int32 = Ausdrücke.IndexOf(Ausdruck)
-            If tmp = -1 Then
+            If tmp = -1 OrElse Ausdrücke.Ausdruck(tmp).Übersetzung = "" Then
                 Return ""
             Else
                 Return Ausdrücke.Ausdruck(tmp).Übersetzung
@@ -136,7 +136,7 @@ Public Class clsÜbersetzen
     ReadOnly Property Übersetze(ByVal Ausdruck As String, ByVal Standard As String) As String
         Get
             Dim tmp As Int32 = Ausdrücke.IndexOf(Ausdruck)
-            If tmp = -1 Then
+            If tmp = -1 OrElse Ausdrücke.Ausdruck(tmp).Übersetzung = "" Then
                 Return Standard
             Else
                 Return Ausdrücke.Ausdruck(tmp).Übersetzung
@@ -147,7 +147,7 @@ Public Class clsÜbersetzen
     ReadOnly Property Übersetze(ByVal Ausdruck As String, ByVal Standard As String, ByVal ParamArray Args() As String) As String
         Get
             Dim tmp As Int32 = Ausdrücke.IndexOf(Ausdruck), Text As String
-            If tmp = -1 Then
+            If tmp = -1 OrElse Ausdrücke.Ausdruck(tmp).Übersetzung = "" Then
                 Text = Standard
             Else
                 Text = Ausdrücke.Ausdruck(tmp).Übersetzung
