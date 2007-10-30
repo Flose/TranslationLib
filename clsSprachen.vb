@@ -5,11 +5,11 @@ Public Class clsÜbersetzen
     Dim AktuelleSprache As String
 
     Function Load(ByVal Sprache As String) As Boolean
-        If System.IO.File.Exists(SprachenPfad & "\" & Sprache & ".lng") Then
+        If System.IO.File.Exists(SprachenPfad & "/" & Sprache & ".lng") Then
             Ausdrücke.Ausdruck = Nothing
             Dim Reader As System.IO.StreamReader = Nothing
             Try
-                Reader = New System.IO.StreamReader(SprachenPfad & "\" & Sprache & ".lng", True)
+                Reader = New System.IO.StreamReader(SprachenPfad & "/" & Sprache & ".lng", True)
                 Dim Version As String = Reader.ReadLine()
                 Dim tmp As Int16, tmpstring As String
                 Do Until Reader.Peek = -1
@@ -81,7 +81,7 @@ Public Class clsÜbersetzen
 
     Sub New(ByVal Directory As String)
         Dim tmp As String
-        SprachenPfad = Directory
+        SprachenPfad = Directory.Replace("\", "/")
         If System.IO.Directory.Exists(SprachenPfad) Then
             For Each File As String In System.IO.Directory.GetFiles(SprachenPfad, "*.lng", IO.SearchOption.TopDirectoryOnly)
                 tmp = ""
@@ -202,28 +202,32 @@ Public Class clsÜbersetzen
     End Sub
 
     Function GetAufzählungVon(ByVal Zahl As Int32) As String
-        Select Case AktuelleSprache.ToLower
-            Case "french"
-                Select Case Zahl
-                    Case 1
-                        Return "1ère"
-                    Case Else
-                        Return Zahl & "ième"
-                End Select
-            Case "english"
-                Select Case CStr(Zahl).Substring(CStr(Zahl).Length - 1)
-                    Case 1
-                        Return Zahl & "st"
-                    Case 2
-                        Return Zahl & "nd"
-                    Case 3
-                        Return Zahl & "rd"
-                    Case Else
-                        Return Zahl & "th"
-                End Select
-            Case Else
-                Return Zahl & "."
-        End Select
+        If AktuelleSprache IsNot Nothing Then
+            Select Case AktuelleSprache.ToLower
+                Case "french"
+                    Select Case Zahl
+                        Case 1
+                            Return "1ère"
+                        Case Else
+                            Return Zahl & "ième"
+                    End Select
+                Case "english"
+                    Select Case CStr(Zahl).Substring(CStr(Zahl).Length - 1)
+                        Case 1
+                            Return Zahl & "st"
+                        Case 2
+                            Return Zahl & "nd"
+                        Case 3
+                            Return Zahl & "rd"
+                        Case Else
+                            Return Zahl & "th"
+                    End Select
+                Case Else
+                    Return Zahl & "."
+            End Select
+        Else
+            Return Zahl & "."
+        End If
     End Function
 End Class
 
