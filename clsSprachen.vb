@@ -2,7 +2,7 @@ Public Class clsÜbersetzen
     Dim Ausdrücke As New clsAusdrücke
     Public Sprachen() As String, SprachenNamen() As String
     Public SprachenPfad As String
-    Dim AktuelleSprache As String
+    Public AktuelleSprache As String
 
     Function Load(ByVal Sprache As String) As Boolean
         If System.IO.File.Exists(SprachenPfad & "/" & Sprache & ".lng") Then
