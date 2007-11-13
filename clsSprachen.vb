@@ -1,5 +1,5 @@
 Public Class clsÜbersetzen
-    Dim Ausdrücke As New clsAusdrücke
+    Public Ausdrücke As New clsAusdrücke
     Public Sprachen() As String, SprachenNamen() As String
     Public SprachenPfad As String
     Public AktuelleSprache As String
@@ -231,7 +231,7 @@ Public Class clsÜbersetzen
     End Function
 End Class
 
-Class clsAusdrücke
+Public Class clsAusdrücke
     Friend Ausdruck() As clsAusdruck
 
     Function IndexOf(ByVal Ausdruck As String) As Int32
