@@ -11,26 +11,39 @@ Public Class clsÜbersetzen
             Try
                 Reader = New System.IO.StreamReader(SprachenPfad & "/" & Sprache & ".lng", True)
                 Dim Version As String = Reader.ReadLine()
-                Dim tmp As Int16, tmpstring As String
-                Do Until Reader.Peek = -1
-                    Try
-                        tmpstring = Reader.ReadLine
-                        If tmpstring.Substring(0, 1) <> "'" Then
-                            tmp = tmpstring.IndexOf("=")
-                            Ausdrücke.Add(tmpstring.Substring(0, tmp), tmpstring.Substring(tmp + 1))
-                        End If
-                    Catch
-                    End Try
-                Loop
+                Dim tmp As String = Reader.ReadToEnd
                 Reader.Close()
+                Return Load(Sprache, tmp)
             Catch
                 If Reader IsNot Nothing Then Reader.Close()
+                Return False
             End Try
-            If Ausdrücke.Count > 0 Then AktuelleSprache = Sprache : Return True Else Return False
         Else
             Return False
         End If
     End Function
+
+    Function Load(ByVal Sprache As String, ByVal SprachText As String) As Boolean
+        Ausdrücke.Ausdruck = Nothing
+        Try
+            Dim tmp As Int16, tmpstring() As String = SprachText.Split(New String() {Environment.NewLine}, System.StringSplitOptions.RemoveEmptyEntries)
+            For i As Int16 = 0 To tmpstring.Length - 1
+                '    tmpstring(i) = tmpstring(i).Trim
+                Try
+                    If tmpstring(i).Substring(0, 1) <> "'" Then
+                        tmp = tmpstring(i).IndexOf("=")
+                        If tmp > -1 Then
+                            Ausdrücke.Add(tmpstring(i).Substring(0, tmp), tmpstring(i).Substring(tmp + 1))
+                        End If
+                    End If
+                Catch
+                End Try
+            Next i
+        Catch
+        End Try
+        If Ausdrücke.Count > 0 Then AktuelleSprache = Sprache : Return True Else Return False
+    End Function
+
 
     Function ÜberprüfeSprache(ByVal Sprache As String) As String
         If Sprachen Is Nothing OrElse Array.IndexOf(Sprachen, Sprache) = -1 Then
@@ -60,11 +73,13 @@ Public Class clsÜbersetzen
                 Do Until Reader.Peek = -1
                     Try
                         tmpstring = Reader.ReadLine
-                        tmp = tmpstring.IndexOf("=")
-                        If tmpstring.Substring(0, tmp).ToLower.Trim = "sprachenname" Then
-                            SprachenName = tmpstring.Substring(tmp + 1)
-                            Reader.Close()
-                            Return True
+                        If tmpstring.Length > 0 AndAlso tmpstring.Substring(0, 1) <> "'" Then
+                            tmp = tmpstring.IndexOf("=")
+                            If tmpstring.Substring(0, tmp).ToLower.Trim = "sprachenname" Then
+                                SprachenName = tmpstring.Substring(tmp + 1)
+                                Reader.Close()
+                                Return True
+                            End If
                         End If
                     Catch
                     End Try
@@ -177,12 +192,22 @@ Public Class clsÜbersetzen
                 tmp = teile(teile.GetUpperBound(0))
                 ReDim Preserve teile(teile.GetUpperBound(0) - 1)
                 tmp = Übersetze(tmp, "", teile)
-                If tmp <> "" Then Control.Text = tmp
+                If tmp <> "" Then
+                    Select Case Control.GetType.ToString.ToLower
+                        Case "system.windows.forms.listviewgroup"
+                            Control.header = tmp
+                        Case Else
+                            Control.Text = tmp
+                    End Select
+                End If
             End If
             Select Case Control.GetType.ToString.ToLower
                 Case "system.windows.forms.listview"
                     For i As Int16 = 0 To Control.Columns.Count - 1
                         ÜbersetzeControl(Control.Columns(i))
+                    Next i
+                    For i As Int16 = 0 To Control.groups.Count - 1
+                        ÜbersetzeControl(Control.groups(i))
                     Next i
                 Case "system.windows.forms.toolstrip", "system.windows.forms.menustrip"
                     For i As Int16 = 0 To Control.Items.Count - 1
