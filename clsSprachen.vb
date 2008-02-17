@@ -28,8 +28,8 @@ Public Class cls‹bersetzen
         Try
             Dim tmp As Int16, tmpstring() As String = SprachText.Split(New String() {Environment.NewLine}, System.StringSplitOptions.RemoveEmptyEntries)
             For i As Int16 = 0 To tmpstring.Length - 1
-                '    tmpstring(i) = tmpstring(i).Trim
                 Try
+                    tmpstring(i) = tmpstring(i).Trim(New Char() {Chr(13), Chr(10)})
                     If tmpstring(i).Substring(0, 1) <> "'" Then
                         tmp = tmpstring(i).IndexOf("=")
                         If tmp > -1 Then
@@ -43,7 +43,6 @@ Public Class cls‹bersetzen
         End Try
         If Ausdr¸cke.Count > 0 Then AktuelleSprache = Sprache : Return True Else Return False
     End Function
-
 
     Function ‹berpr¸feSprache(ByVal Sprache As String) As String
         If Sprachen Is Nothing OrElse Array.IndexOf(Sprachen, Sprache) = -1 Then
@@ -169,6 +168,7 @@ Public Class cls‹bersetzen
             End If
             If Args IsNot Nothing Then
                 For i As Int16 = 0 To Args.GetUpperBound(0)
+                    If Args(i) Is Nothing Then Args(i) = ""
                     If Args(i).Length >= 3 AndAlso Args(i).Substring(0, 2) = "##" AndAlso IsNumeric(Args(i).Substring(2).Trim) Then Args(i) = GetAufz‰hlungVon(Args(i).Substring(2).Trim)
                 Next i
             End If
@@ -185,41 +185,107 @@ Public Class cls‹bersetzen
     End Property
 
     Sub ‹bersetzeControl(ByVal Control As Object)
+        Dim tmpControl As System.Windows.Forms.Control
+        Try
+            tmpControl = Control
+        Catch
+            Try
+                Select Case Control.GetType.ToString.ToLower
+                    Case "system.windows.forms.menuitem"
+                        Dim tmp As String, teile() As String
+                        If CStr(CType(Control, System.Windows.Forms.MenuItem).Tag) <> "" Then
+                            teile = CStr(CType(Control, System.Windows.Forms.MenuItem).Tag).Split(",")
+                            tmp = teile(teile.GetUpperBound(0))
+                            ReDim Preserve teile(teile.GetUpperBound(0) - 1)
+                            tmp = ‹bersetze(tmp, "", teile)
+                            If tmp <> "" Then
+                                CType(Control, System.Windows.Forms.MenuItem).Text = tmp
+                            End If
+                        End If
+                    Case "system.windows.forms.toolstripmenuitem"
+                        Dim tmp As String, teile() As String
+                        If CStr(CType(Control, System.Windows.Forms.ToolStripMenuItem).Tag) <> "" Then
+                            teile = CStr(CType(Control, System.Windows.Forms.ToolStripMenuItem).Tag).Split(",")
+                            tmp = teile(teile.GetUpperBound(0))
+                            ReDim Preserve teile(teile.GetUpperBound(0) - 1)
+                            tmp = ‹bersetze(tmp, "", teile)
+                            If tmp <> "" Then
+                                CType(Control, System.Windows.Forms.ToolStripMenuItem).Text = tmp
+                            End If
+                        End If
+                        For i As Int16 = 0 To CType(Control, System.Windows.Forms.ToolStripMenuItem).DropDownItems.Count - 1
+                            ‹bersetzeControl(CType(Control, System.Windows.Forms.ToolStripMenuItem).DropDownItems(i))
+                        Next i
+                    Case "system.windows.forms.toolstripbutton"
+                        Dim tmp As String, teile() As String
+                        If CStr(CType(Control, System.Windows.Forms.ToolStripButton).Tag) <> "" Then
+                            teile = CStr(CType(Control, System.Windows.Forms.ToolStripButton).Tag).Split(",")
+                            tmp = teile(teile.GetUpperBound(0))
+                            ReDim Preserve teile(teile.GetUpperBound(0) - 1)
+                            tmp = ‹bersetze(tmp, "", teile)
+                            If tmp <> "" Then
+                                CType(Control, System.Windows.Forms.ToolStripButton).Text = tmp
+                            End If
+                        End If
+                    Case "system.windows.forms.columnheader"
+                        Dim tmp As String, teile() As String
+                        If CStr(CType(Control, System.Windows.Forms.ColumnHeader).Tag) <> "" Then
+                            teile = CStr(CType(Control, System.Windows.Forms.ColumnHeader).Tag).Split(",")
+                            tmp = teile(teile.GetUpperBound(0))
+                            ReDim Preserve teile(teile.GetUpperBound(0) - 1)
+                            tmp = ‹bersetze(tmp, "", teile)
+                            If tmp <> "" Then
+                                CType(Control, System.Windows.Forms.ColumnHeader).Text = tmp
+                            End If
+                        End If
+                    Case "system.windows.forms.listviewgroup"
+                        Dim tmp As String, teile() As String
+                        If CStr(CType(Control, System.Windows.Forms.ListViewGroup).Tag) <> "" Then
+                            teile = CStr(CType(Control, System.Windows.Forms.ListViewGroup).Tag).Split(",")
+                            tmp = teile(teile.GetUpperBound(0))
+                            ReDim Preserve teile(teile.GetUpperBound(0) - 1)
+                            tmp = ‹bersetze(tmp, "", teile)
+                            If tmp <> "" Then
+                                CType(Control, System.Windows.Forms.ListViewGroup).Header = tmp
+                            End If
+                        End If
+                End Select
+            Catch
+            End Try
+            Exit Sub
+        End Try
+
         Try
             Dim tmp As String, teile() As String
-            If Control.Tag <> "" Then
-                teile = Control.Tag.Split(",")
+            If CStr(tmpControl.Tag) <> "" Then
+                teile = CStr(tmpControl.Tag).Split(",")
                 tmp = teile(teile.GetUpperBound(0))
                 ReDim Preserve teile(teile.GetUpperBound(0) - 1)
                 tmp = ‹bersetze(tmp, "", teile)
                 If tmp <> "" Then
-                    Select Case Control.GetType.ToString.ToLower
-                        Case "system.windows.forms.listviewgroup"
-                            Control.header = tmp
-                        Case Else
-                            Control.Text = tmp
-                    End Select
+                    tmpControl.Text = tmp
                 End If
             End If
+
             Select Case Control.GetType.ToString.ToLower
                 Case "system.windows.forms.listview"
-                    For i As Int16 = 0 To Control.Columns.Count - 1
-                        ‹bersetzeControl(Control.Columns(i))
+                    For i As Int16 = 0 To CType(Control, System.Windows.Forms.ListView).Columns.Count - 1
+                        ‹bersetzeControl(CType(Control, System.Windows.Forms.ListView).Columns(i))
                     Next i
-                    For i As Int16 = 0 To Control.groups.Count - 1
-                        ‹bersetzeControl(Control.groups(i))
+                    For i As Int16 = 0 To CType(Control, System.Windows.Forms.ListView).Groups.Count - 1
+                        ‹bersetzeControl(CType(Control, System.Windows.Forms.ListView).Groups(i))
                     Next i
-                Case "system.windows.forms.toolstrip", "system.windows.forms.menustrip"
-                    For i As Int16 = 0 To Control.Items.Count - 1
-                        ‹bersetzeControl(Control.Items(i))
+                Case "system.windows.forms.toolstrip"
+                    For i As Int16 = 0 To CType(Control, System.Windows.Forms.ToolStrip).Items.Count - 1
+                        ‹bersetzeControl(CType(Control, System.Windows.Forms.ToolStrip).Items(i))
                     Next i
-                Case "system.windows.forms.toolstripmenuitem"
-                    For i As Int16 = 0 To Control.dropdownItems.Count - 1
-                        ‹bersetzeControl(Control.dropdownItems(i))
+                Case "system.windows.forms.menustrip"
+                    For i As Int16 = 0 To CType(Control, System.Windows.Forms.MenuStrip).Items.Count - 1
+                        ‹bersetzeControl(CType(Control, System.Windows.Forms.MenuStrip).Items(i))
                     Next i
                 Case Else
-                    For i As Int16 = 0 To Control.Controls.Count - 1
-                        ‹bersetzeControl(Control.Controls.Item(i))
+                    For i As Int16 = 0 To tmpControl.Controls.Count - 1
+                        ‹bersetzeControl(tmpControl.Controls.Item(i))
                     Next i
             End Select
         Catch
