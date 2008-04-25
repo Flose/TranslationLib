@@ -283,6 +283,10 @@ Public Class cls‹bersetzen
                     For i As Int16 = 0 To CType(Control, System.Windows.Forms.MenuStrip).Items.Count - 1
                         ‹bersetzeControl(CType(Control, System.Windows.Forms.MenuStrip).Items(i))
                     Next i
+                Case "system.windows.forms.contextmenustrip"
+                    For i As Int16 = 0 To CType(Control, System.Windows.Forms.ContextMenuStrip).Items.Count - 1
+                        ‹bersetzeControl(CType(Control, System.Windows.Forms.ContextMenuStrip).Items(i))
+                    Next i
                 Case Else
                     For i As Int16 = 0 To tmpControl.Controls.Count - 1
                         ‹bersetzeControl(tmpControl.Controls.Item(i))
