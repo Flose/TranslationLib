@@ -160,6 +160,7 @@ Public Class clsÜbersetzen
 
     ReadOnly Property Übersetze(ByVal Ausdruck As String, ByVal Standard As String, ByVal ParamArray Args() As String) As String
         Get
+            Dim tmpText As String
             Dim tmp As Int32 = Ausdrücke.IndexOf(Ausdruck), Text As String
             If tmp = -1 OrElse Ausdrücke.Ausdruck(tmp).Übersetzung = "" Then
                 Text = Standard
@@ -172,15 +173,18 @@ Public Class clsÜbersetzen
                     If Args(i).Length >= 3 AndAlso Args(i).Substring(0, 2) = "##" AndAlso IsNumeric(Args(i).Substring(2).Trim) Then Args(i) = GetAufzählungVon(Args(i).Substring(2).Trim)
                 Next i
             End If
+
             Do
                 Try
-                    Return String.Format(Text, Args)
+                    tmpText = String.Format(Text, Args)
+                    Exit Do
                 Catch ex As FormatException
                     If Args Is Nothing Then ReDim Args(0) Else ReDim Preserve Args(Args.Length)
                 Catch ex As ArgumentNullException
                     ReDim Args(0)
                 End Try
             Loop
+            Return tmpText.Replace("\n\n", Environment.NewLine) 'todo
         End Get
     End Property
 
@@ -340,7 +344,7 @@ Public Class clsAusdrücke
 
     Function IndexOfÜbersetzung(ByVal Übersetzung As String) As Int32
         For i As Int32 = 0 To Count - 1
-            If String.Compare(Me.Ausdruck(i).Übersetzung, Übersetzung, True) = 0 Then
+            If String.Compare(Me.Ausdruck(i).Übersetzung, Übersetzung, True) = 0 AndAlso Me.Ausdruck(i).Ausdruck.ToLower <> "sprachenname" Then
                 Return i
             End If
         Next i
