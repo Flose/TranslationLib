@@ -142,7 +142,7 @@ Public Class clsÜbersetzen
             If tmp = -1 OrElse Ausdrücke.Ausdruck(tmp).Übersetzung = "" Then
                 Return ""
             Else
-                Return Ausdrücke.Ausdruck(tmp).Übersetzung
+                Return Ausdrücke.Ausdruck(tmp).Übersetzung.Replace("\n\n", Environment.NewLine)
             End If
         End Get
     End Property
@@ -151,9 +151,9 @@ Public Class clsÜbersetzen
         Get
             Dim tmp As Int32 = Ausdrücke.IndexOf(Ausdruck)
             If tmp = -1 OrElse Ausdrücke.Ausdruck(tmp).Übersetzung = "" Then
-                Return Standard
+                Return Standard.Replace("\n\n", Environment.NewLine)
             Else
-                Return Ausdrücke.Ausdruck(tmp).Übersetzung
+                Return Ausdrücke.Ausdruck(tmp).Übersetzung.Replace("\n\n", Environment.NewLine)
             End If
         End Get
     End Property
@@ -184,7 +184,7 @@ Public Class clsÜbersetzen
                     ReDim Args(0)
                 End Try
             Loop
-            Return tmpText.Replace("\n\n", Environment.NewLine) 'todo
+            Return tmpText.Replace("\n\n", Environment.NewLine)
         End Get
     End Property
 
