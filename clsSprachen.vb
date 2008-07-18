@@ -4,6 +4,12 @@ Public Class cls‹bersetzen
     Public SprachenPfad As String
     Public AktuelleSprache As String
 
+    Dim Standard‹bersetzen As cls‹bersetzen
+#If DEBUG Then
+    Dim NichtVerwendeteAusdr¸cke As New List(Of String)
+    Dim FehlendeAusdr¸cke As New List(Of String)
+#End If
+
     Function Load(ByVal Sprache As String) As Boolean
         If System.IO.File.Exists(SprachenPfad & "/" & Sprache & ".lng") Then
             Ausdr¸cke.Ausdruck = Nothing
@@ -25,6 +31,10 @@ Public Class cls‹bersetzen
 
     Function Load(ByVal Sprache As String, ByVal SprachText As String) As Boolean
         Ausdr¸cke.Ausdruck = Nothing
+#If DEBUG Then
+        NichtVerwendeteAusdr¸cke.Clear()
+        FehlendeAusdr¸cke.Clear()
+#End If
         Try
             Dim tmp As Int16, tmpstring() As String = SprachText.Split(New String() {Environment.NewLine}, System.StringSplitOptions.RemoveEmptyEntries)
             For i As Int16 = 0 To tmpstring.Length - 1
@@ -34,6 +44,9 @@ Public Class cls‹bersetzen
                         tmp = tmpstring(i).IndexOf("=")
                         If tmp > -1 Then
                             Ausdr¸cke.Add(tmpstring(i).Substring(0, tmp), tmpstring(i).Substring(tmp + 1))
+#If DEBUG Then
+                            NichtVerwendeteAusdr¸cke.Add(tmpstring(i).Substring(0, tmp))
+#End If
                         End If
                     End If
                 Catch
@@ -93,10 +106,11 @@ Public Class cls‹bersetzen
         End If
     End Function
 
-    Sub New(ByVal Directory As String)
+    Sub New(ByVal Directory As String, ByVal Standard‹bersetzenText As String)
         Dim tmp As String
         SprachenPfad = Directory.Replace("\", "/")
         If System.IO.Directory.Exists(SprachenPfad) Then
+            'Sprachdateien finden
             For Each File As String In System.IO.Directory.GetFiles(SprachenPfad, "*.lng", IO.SearchOption.TopDirectoryOnly)
                 tmp = ""
                 If ‹berpr¸feDatei(File, tmp) Then
@@ -111,6 +125,10 @@ Public Class cls‹bersetzen
                     SprachenNamen(SprachenNamen.GetUpperBound(0)) = tmp
                 End If
             Next
+        End If
+        If Standard‹bersetzenText.Trim <> "" Then
+            Standard‹bersetzen = New cls‹bersetzen(Directory, "")
+            Standard‹bersetzen.Load("Standard", Standard‹bersetzenText)
         End If
     End Sub
 
@@ -140,31 +158,62 @@ Public Class cls‹bersetzen
         Get
             Dim tmp As Int32 = Ausdr¸cke.IndexOf(Ausdruck)
             If tmp = -1 OrElse Ausdr¸cke.Ausdruck(tmp).‹bersetzung = "" Then
-                Return ""
+#If DEBUG Then
+                If Not FehlendeAusdr¸cke.Contains(Ausdruck) Then FehlendeAusdr¸cke.Add(Ausdruck)
+#End If
+                'schauen ob in standard ist
+                tmp = Standard‹bersetzen.Ausdr¸cke.IndexOf(Ausdruck)
+                If tmp = -1 OrElse Standard‹bersetzen.Ausdr¸cke.Ausdruck(tmp).‹bersetzung = "" Then
+                    Return Ausdruck '""
+                Else
+                    Return Standard‹bersetzen.Ausdr¸cke.Ausdruck(tmp).‹bersetzung.Replace("\n\n", Environment.NewLine)
+                End If
             Else
+#If debug Then
+                If NichtVerwendeteAusdr¸cke.Contains(Ausdruck) Then NichtVerwendeteAusdr¸cke.Remove(Ausdruck)
+#End If
                 Return Ausdr¸cke.Ausdruck(tmp).‹bersetzung.Replace("\n\n", Environment.NewLine)
             End If
         End Get
     End Property
 
-    ReadOnly Property ‹bersetze(ByVal Ausdruck As String, ByVal Standard As String) As String
-        Get
-            Dim tmp As Int32 = Ausdr¸cke.IndexOf(Ausdruck)
-            If tmp = -1 OrElse Ausdr¸cke.Ausdruck(tmp).‹bersetzung = "" Then
-                Return Standard.Replace("\n\n", Environment.NewLine)
-            Else
-                Return Ausdr¸cke.Ausdruck(tmp).‹bersetzung.Replace("\n\n", Environment.NewLine)
-            End If
-        End Get
-    End Property
+    '    ReadOnly Property ‹bersetzers(ByVal Ausdruck As String, ByVal Standard As String) As String
+    '        Get
+    '            Dim tmp As Int32 = Ausdr¸cke.IndexOf(Ausdruck)
+    '            If tmp = -1 OrElse Ausdr¸cke.Ausdruck(tmp).‹bersetzung = "" Then
+    '#If DEBUG Then
+    '                If Not FehlendeAusdr¸cke.Contains(Ausdruck) Then FehlendeAusdr¸cke.Add(Ausdruck)
+    '#End If
+    '                Return Standard.Replace("\n\n", Environment.NewLine)
+    '            Else
+    '#If DEBUG Then
+    '                If NichtVerwendeteAusdr¸cke.Contains(Ausdruck) Then NichtVerwendeteAusdr¸cke.Remove(Ausdruck)
+    '#End If
+    '                Return Ausdr¸cke.Ausdruck(tmp).‹bersetzung.Replace("\n\n", Environment.NewLine)
+    '            End If
+    '        End Get
+    '    End Property
 
-    ReadOnly Property ‹bersetze(ByVal Ausdruck As String, ByVal Standard As String, ByVal ParamArray Args() As String) As String
+    ReadOnly Property ‹bersetze(ByVal Ausdruck As String, ByVal ParamArray Args() As String) As String
         Get
             Dim tmpText As String
             Dim tmp As Int32 = Ausdr¸cke.IndexOf(Ausdruck), Text As String
             If tmp = -1 OrElse Ausdr¸cke.Ausdruck(tmp).‹bersetzung = "" Then
-                Text = Standard
+#If DEBUG Then
+                If Not FehlendeAusdr¸cke.Contains(Ausdruck) Then FehlendeAusdr¸cke.Add(Ausdruck)
+#End If
+                'Text = Standard
+                'schauen ob in standard ist
+                tmp = Standard‹bersetzen.Ausdr¸cke.IndexOf(Ausdruck)
+                If tmp = -1 OrElse Standard‹bersetzen.Ausdr¸cke.Ausdruck(tmp).‹bersetzung = "" Then
+                    Text = Ausdruck '""
+                Else
+                    Text = Standard‹bersetzen.Ausdr¸cke.Ausdruck(tmp).‹bersetzung
+                End If
             Else
+#If DEBUG Then
+                If NichtVerwendeteAusdr¸cke.Contains(Ausdruck) Then NichtVerwendeteAusdr¸cke.Remove(Ausdruck)
+#End If
                 Text = Ausdr¸cke.Ausdruck(tmp).‹bersetzung
             End If
             If Args IsNot Nothing Then
@@ -173,7 +222,6 @@ Public Class cls‹bersetzen
                     If Args(i).Length >= 3 AndAlso Args(i).Substring(0, 2) = "##" AndAlso IsNumeric(Args(i).Substring(2).Trim) Then Args(i) = GetAufz‰hlungVon(Args(i).Substring(2).Trim)
                 Next i
             End If
-
             Do
                 Try
                     tmpText = String.Format(Text, Args)
@@ -201,7 +249,7 @@ Public Class cls‹bersetzen
                             teile = CStr(CType(Control, System.Windows.Forms.MenuItem).Tag).Split(",")
                             tmp = teile(teile.GetUpperBound(0))
                             ReDim Preserve teile(teile.GetUpperBound(0) - 1)
-                            tmp = ‹bersetze(tmp, "", teile)
+                            tmp = ‹bersetze(tmp, teile)
                             If tmp <> "" Then
                                 CType(Control, System.Windows.Forms.MenuItem).Text = tmp
                             End If
@@ -212,7 +260,7 @@ Public Class cls‹bersetzen
                             teile = CStr(CType(Control, System.Windows.Forms.ToolStripMenuItem).Tag).Split(",")
                             tmp = teile(teile.GetUpperBound(0))
                             ReDim Preserve teile(teile.GetUpperBound(0) - 1)
-                            tmp = ‹bersetze(tmp, "", teile)
+                            tmp = ‹bersetze(tmp, teile)
                             If tmp <> "" Then
                                 CType(Control, System.Windows.Forms.ToolStripMenuItem).Text = tmp
                             End If
@@ -226,7 +274,7 @@ Public Class cls‹bersetzen
                             teile = CStr(CType(Control, System.Windows.Forms.ToolStripButton).Tag).Split(",")
                             tmp = teile(teile.GetUpperBound(0))
                             ReDim Preserve teile(teile.GetUpperBound(0) - 1)
-                            tmp = ‹bersetze(tmp, "", teile)
+                            tmp = ‹bersetze(tmp, teile)
                             If tmp <> "" Then
                                 CType(Control, System.Windows.Forms.ToolStripButton).Text = tmp
                             End If
@@ -237,7 +285,7 @@ Public Class cls‹bersetzen
                             teile = CStr(CType(Control, System.Windows.Forms.ColumnHeader).Tag).Split(",")
                             tmp = teile(teile.GetUpperBound(0))
                             ReDim Preserve teile(teile.GetUpperBound(0) - 1)
-                            tmp = ‹bersetze(tmp, "", teile)
+                            tmp = ‹bersetze(tmp, teile)
                             If tmp <> "" Then
                                 CType(Control, System.Windows.Forms.ColumnHeader).Text = tmp
                             End If
@@ -248,7 +296,7 @@ Public Class cls‹bersetzen
                             teile = CStr(CType(Control, System.Windows.Forms.ListViewGroup).Tag).Split(",")
                             tmp = teile(teile.GetUpperBound(0))
                             ReDim Preserve teile(teile.GetUpperBound(0) - 1)
-                            tmp = ‹bersetze(tmp, "", teile)
+                            tmp = ‹bersetze(tmp, teile)
                             If tmp <> "" Then
                                 CType(Control, System.Windows.Forms.ListViewGroup).Header = tmp
                             End If
@@ -265,7 +313,7 @@ Public Class cls‹bersetzen
                 teile = CStr(tmpControl.Tag).Split(",")
                 tmp = teile(teile.GetUpperBound(0))
                 ReDim Preserve teile(teile.GetUpperBound(0) - 1)
-                tmp = ‹bersetze(tmp, "", teile)
+                tmp = ‹bersetze(tmp, teile)
                 If tmp <> "" Then
                     tmpControl.Text = tmp
                 End If
