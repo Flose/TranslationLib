@@ -129,14 +129,24 @@ Public Class clsÜbersetzen
         If StandardÜbersetzenText.Trim <> "" Then
             StandardÜbersetzen = New clsÜbersetzen(Directory, "")
             StandardÜbersetzen.Load("Standard", StandardÜbersetzenText)
+        Else
+            StandardÜbersetzen = New clsÜbersetzen
         End If
+    End Sub
+
+    Sub New()
     End Sub
 
     ReadOnly Property RückÜbersetzen(ByVal Übersetzung As String) As String
         Get
             Dim tmp As Int32 = Ausdrücke.IndexOfÜbersetzung(Übersetzung)
             If tmp = -1 Then
-                Return ""
+                tmp = StandardÜbersetzen.Ausdrücke.IndexOfÜbersetzung(Übersetzung)
+                If tmp = -1 OrElse StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Ausdruck = "" Then
+                    Return ""
+                Else
+                    Return StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Ausdruck
+                End If
             Else
                 Return Ausdrücke.Ausdruck(tmp).Ausdruck
             End If
@@ -147,7 +157,12 @@ Public Class clsÜbersetzen
         Get
             Dim tmp As Int32 = Ausdrücke.IndexOfÜbersetzung(Übersetzung)
             If tmp = -1 Then
-                Return Standard
+                tmp = StandardÜbersetzen.Ausdrücke.IndexOfÜbersetzung(Übersetzung)
+                If tmp = -1 OrElse StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Ausdruck = "" Then
+                    Return Standard
+                Else
+                    Return StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Ausdruck
+                End If
             Else
                 Return Ausdrücke.Ausdruck(tmp).Ausdruck
             End If
