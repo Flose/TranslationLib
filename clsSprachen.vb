@@ -58,21 +58,24 @@ Public Class clsÜbersetzen
     End Function
 
     Function ÜberprüfeSprache(ByVal Sprache As String) As String
-        If Sprachen Is Nothing OrElse Array.IndexOf(Sprachen, Sprache) = -1 Then
-            Sprache = My.Application.Culture.EnglishName.Substring(0, My.Application.Culture.EnglishName.IndexOf(" ("))
-            If Sprachen Is Nothing OrElse Array.IndexOf(Sprachen, Sprache) = -1 Then
-                If Sprachen IsNot Nothing AndAlso Sprachen.Length > 0 Then
-                    Return Sprachen(0)
-                Else
-                    Return ""
-                End If
-            Else
-                Return Sprache
-            End If
-        Else
+        If Sprachen Is Nothing Then
+            Return ""
+        ElseIf Array.IndexOf(Sprachen, Sprache) > -1 Then
+            'sprache ist verfügbar
             Return Sprache
+        Else 'Wenn zu uberprüfende Sprache nicht verfügbar ist
+            'system sprache finden
+            Sprache = My.Application.Culture.EnglishName.Substring(0, My.Application.Culture.EnglishName.IndexOf(" ("))
+
+            'schauen ob systemsprache verfügbar ist
+            If Array.IndexOf(Sprachen, Sprache) > -1 Then
+                Return Sprache
+            ElseIf Array.IndexOf(Sprachen, "English") > -1 Then 'wenn englisch verfügbar ist
+                Return "English"
+            Else
+                Return ""
+            End If
         End If
-        Return ""
     End Function
 
     Function ÜberprüfeDatei(ByVal SprachDatei As String, Optional ByRef SprachenName As String = "") As Boolean
