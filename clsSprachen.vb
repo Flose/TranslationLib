@@ -13,15 +13,15 @@ Public Class clsÜbersetzen
     Function Load(ByVal Sprache As String) As Boolean
         If System.IO.File.Exists(SprachenPfad & "/" & Sprache & ".lng") Then
             Ausdrücke.Ausdruck = Nothing
-            Dim Reader As System.IO.StreamReader = Nothing
             Try
-                Reader = New System.IO.StreamReader(SprachenPfad & "/" & Sprache & ".lng", True)
-                Dim Version As String = Reader.ReadLine()
-                Dim tmp As String = Reader.ReadToEnd
-                Reader.Close()
-                Return Load(Sprache, tmp)
+                Using Reader As System.IO.StreamReader = New System.IO.StreamReader(SprachenPfad & "/" & Sprache & ".lng", True)
+                    Reader.ReadLine() 'Version 
+                    Dim tmp As String = Reader.ReadToEnd
+                    'Reader.Close()
+                    Return Load(Sprache, tmp)
+                End Using
             Catch
-                If Reader IsNot Nothing Then Reader.Close()
+                'If Reader IsNot Nothing Then Reader.Close()
                 Return False
             End Try
         Else
@@ -36,12 +36,12 @@ Public Class clsÜbersetzen
         FehlendeAusdrücke.Clear()
 #End If
         Try
-            Dim tmp As Int16, tmpstring() As String = SprachText.Split(New String() {Environment.NewLine}, System.StringSplitOptions.RemoveEmptyEntries)
-            For i As Int16 = 0 To tmpstring.Length - 1
+            Dim tmp As Int32, tmpstring() As String = SprachText.Split(New String() {Environment.NewLine}, System.StringSplitOptions.RemoveEmptyEntries)
+            For i As Int32 = 0 To tmpstring.Length - 1
                 Try
-                    tmpstring(i) = tmpstring(i).Trim(New Char() {Chr(13), Chr(10)})
-                    If tmpstring(i).Substring(0, 1) <> "'" Then
-                        tmp = tmpstring(i).IndexOf("=")
+                    tmpstring(i) = tmpstring(i).Trim(New Char() {ChrW(13), ChrW(10)})
+                    If tmpstring(i).Substring(0, 1) <> "'"c Then
+                        tmp = tmpstring(i).IndexOf("="c)
                         If tmp > -1 Then
                             Ausdrücke.Add(tmpstring(i).Substring(0, tmp), tmpstring(i).Substring(tmp + 1))
 #If DEBUG Then
@@ -59,7 +59,7 @@ Public Class clsÜbersetzen
 
     Function ÜberprüfeSprache(ByVal Sprache As String) As String
         If Sprachen Is Nothing Then
-            Return ""
+            Return String.Empty
         ElseIf Array.IndexOf(Sprachen, Sprache) > -1 Then
             'sprache ist verfügbar
             Return Sprache
@@ -73,23 +73,23 @@ Public Class clsÜbersetzen
             ElseIf Array.IndexOf(Sprachen, "English") > -1 Then 'wenn englisch verfügbar ist
                 Return "English"
             Else
-                Return ""
+                Return String.Empty
             End If
         End If
     End Function
 
-    Function ÜberprüfeDatei(ByVal SprachDatei As String, Optional ByRef SprachenName As String = "") As Boolean
+    Shared Function ÜberprüfeDatei(ByVal SprachDatei As String, Optional ByRef SprachenName As String = "") As Boolean
         If System.IO.File.Exists(SprachDatei) Then
             Dim Reader As System.IO.StreamReader = Nothing
             Try
                 Reader = New System.IO.StreamReader(SprachDatei, True)
                 Reader.ReadLine()
-                Dim tmp As Int16, tmpstring As String
+                Dim tmp As Int32, tmpstring As String
                 Do Until Reader.Peek = -1
                     Try
                         tmpstring = Reader.ReadLine
-                        If tmpstring.Length > 0 AndAlso tmpstring.Substring(0, 1) <> "'" Then
-                            tmp = tmpstring.IndexOf("=")
+                        If tmpstring.Length > 0 AndAlso tmpstring(0) <> "'"c Then
+                            tmp = tmpstring.IndexOf("="c)
                             If tmpstring.Substring(0, tmp).ToLower.Trim = "sprachenname" Then
                                 SprachenName = tmpstring.Substring(tmp + 1)
                                 Reader.Close()
@@ -111,11 +111,11 @@ Public Class clsÜbersetzen
 
     Sub New(ByVal Directory As String, ByVal StandardÜbersetzenText As String)
         Dim tmp As String
-        SprachenPfad = Directory.Replace("\", "/")
+        SprachenPfad = Directory.Replace("\"c, "/"c)
         If System.IO.Directory.Exists(SprachenPfad) Then
             'Sprachdateien finden
             For Each File As String In System.IO.Directory.GetFiles(SprachenPfad, "*.lng", IO.SearchOption.TopDirectoryOnly)
-                tmp = ""
+                tmp = String.Empty
                 If ÜberprüfeDatei(File, tmp) Then
                     If Sprachen Is Nothing Then
                         ReDim Sprachen(0)
@@ -129,8 +129,8 @@ Public Class clsÜbersetzen
                 End If
             Next
         End If
-        If StandardÜbersetzenText.Trim <> "" Then
-            StandardÜbersetzen = New clsÜbersetzen(Directory, "")
+        If StandardÜbersetzenText.Trim.Length > 0 Then
+            StandardÜbersetzen = New clsÜbersetzen(Directory, String.Empty)
             StandardÜbersetzen.Load("Standard", StandardÜbersetzenText)
         Else
             StandardÜbersetzen = New clsÜbersetzen
@@ -145,8 +145,8 @@ Public Class clsÜbersetzen
             Dim tmp As Int32 = Ausdrücke.IndexOfÜbersetzung(Übersetzung)
             If tmp = -1 Then
                 tmp = StandardÜbersetzen.Ausdrücke.IndexOfÜbersetzung(Übersetzung)
-                If tmp = -1 OrElse StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Ausdruck = "" Then
-                    Return ""
+                If tmp = -1 OrElse String.IsNullOrEmpty(StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Ausdruck) Then
+                    Return String.Empty
                 Else
                     Return StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Ausdruck
                 End If
@@ -161,7 +161,7 @@ Public Class clsÜbersetzen
             Dim tmp As Int32 = Ausdrücke.IndexOfÜbersetzung(Übersetzung)
             If tmp = -1 Then
                 tmp = StandardÜbersetzen.Ausdrücke.IndexOfÜbersetzung(Übersetzung)
-                If tmp = -1 OrElse StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Ausdruck = "" Then
+                If tmp = -1 OrElse String.IsNullOrEmpty(StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Ausdruck) Then
                     Return Standard
                 Else
                     Return StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Ausdruck
@@ -175,19 +175,19 @@ Public Class clsÜbersetzen
     ReadOnly Property Übersetze(ByVal Ausdruck As String) As String
         Get
             Dim tmp As Int32 = Ausdrücke.IndexOf(Ausdruck)
-            If tmp = -1 OrElse Ausdrücke.Ausdruck(tmp).Übersetzung = "" Then
+            If tmp = -1 OrElse String.IsNullOrEmpty(Ausdrücke.Ausdruck(tmp).Übersetzung) Then
 #If DEBUG Then
                 If Not FehlendeAusdrücke.Contains(Ausdruck) Then FehlendeAusdrücke.Add(Ausdruck)
 #End If
                 'schauen ob in standard ist
                 tmp = StandardÜbersetzen.Ausdrücke.IndexOf(Ausdruck)
-                If tmp = -1 OrElse StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Übersetzung = "" Then
-                    Return Ausdruck '""
+                If tmp = -1 OrElse String.IsNullOrEmpty(StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Übersetzung) Then
+                    Return Ausdruck
                 Else
                     Return StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Übersetzung.Replace("\n\n", Environment.NewLine)
                 End If
             Else
-#If debug Then
+#If DEBUG Then
                 If NichtVerwendeteAusdrücke.Contains(Ausdruck) Then NichtVerwendeteAusdrücke.Remove(Ausdruck)
 #End If
                 Return Ausdrücke.Ausdruck(tmp).Übersetzung.Replace("\n\n", Environment.NewLine)
@@ -195,36 +195,19 @@ Public Class clsÜbersetzen
         End Get
     End Property
 
-    '    ReadOnly Property Übersetzers(ByVal Ausdruck As String, ByVal Standard As String) As String
-    '        Get
-    '            Dim tmp As Int32 = Ausdrücke.IndexOf(Ausdruck)
-    '            If tmp = -1 OrElse Ausdrücke.Ausdruck(tmp).Übersetzung = "" Then
-    '#If DEBUG Then
-    '                If Not FehlendeAusdrücke.Contains(Ausdruck) Then FehlendeAusdrücke.Add(Ausdruck)
-    '#End If
-    '                Return Standard.Replace("\n\n", Environment.NewLine)
-    '            Else
-    '#If DEBUG Then
-    '                If NichtVerwendeteAusdrücke.Contains(Ausdruck) Then NichtVerwendeteAusdrücke.Remove(Ausdruck)
-    '#End If
-    '                Return Ausdrücke.Ausdruck(tmp).Übersetzung.Replace("\n\n", Environment.NewLine)
-    '            End If
-    '        End Get
-    '    End Property
-
     ReadOnly Property Übersetze(ByVal Ausdruck As String, ByVal ParamArray Args() As String) As String
         Get
             Dim tmpText As String
             Dim tmp As Int32 = Ausdrücke.IndexOf(Ausdruck), Text As String
-            If tmp = -1 OrElse Ausdrücke.Ausdruck(tmp).Übersetzung = "" Then
+            If tmp = -1 OrElse String.IsNullOrEmpty(Ausdrücke.Ausdruck(tmp).Übersetzung) Then
 #If DEBUG Then
                 If Not FehlendeAusdrücke.Contains(Ausdruck) Then FehlendeAusdrücke.Add(Ausdruck)
 #End If
                 'Text = Standard
                 'schauen ob in standard ist
                 tmp = StandardÜbersetzen.Ausdrücke.IndexOf(Ausdruck)
-                If tmp = -1 OrElse StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Übersetzung = "" Then
-                    Text = Ausdruck '""
+                If tmp = -1 OrElse String.IsNullOrEmpty(StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Übersetzung) Then
+                    Text = Ausdruck
                 Else
                     Text = StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Übersetzung
                 End If
@@ -235,9 +218,9 @@ Public Class clsÜbersetzen
                 Text = Ausdrücke.Ausdruck(tmp).Übersetzung
             End If
             If Args IsNot Nothing Then
-                For i As Int16 = 0 To Args.GetUpperBound(0)
-                    If Args(i) Is Nothing Then Args(i) = ""
-                    If Args(i).Length >= 3 AndAlso Args(i).Substring(0, 2) = "##" AndAlso IsNumeric(Args(i).Substring(2).Trim) Then Args(i) = GetAufzählungVon(Args(i).Substring(2).Trim)
+                For i As Int32 = 0 To Args.GetUpperBound(0)
+                    If Args(i) Is Nothing Then Args(i) = String.Empty
+                    If Args(i).Length >= 3 AndAlso Args(i).Substring(0, 2) = "##" AndAlso IsNumeric(Args(i).Substring(2).Trim) Then Args(i) = GetAufzählungVon(CInt(Args(i).Substring(2).Trim))
                 Next i
             End If
             Do
@@ -257,66 +240,71 @@ Public Class clsÜbersetzen
     Sub ÜbersetzeControl(ByVal Control As Object)
         Dim tmpControl As System.Windows.Forms.Control
         Try
-            tmpControl = Control
+            tmpControl = DirectCast(Control, System.Windows.Forms.Control)
         Catch
             Try
                 Select Case Control.GetType.ToString.ToLower
                     Case "system.windows.forms.menuitem"
                         Dim tmp As String, teile() As String
-                        If CStr(CType(Control, System.Windows.Forms.MenuItem).Tag) <> "" Then
-                            teile = CStr(CType(Control, System.Windows.Forms.MenuItem).Tag).Split(",")
+                        Dim tmpMenuItem As Windows.Forms.MenuItem = DirectCast(Control, System.Windows.Forms.MenuItem)
+                        If Not String.IsNullOrEmpty(CStr(tmpMenuItem.Tag)) Then
+                            teile = CStr(tmpMenuItem.Tag).Split(","c)
                             tmp = teile(teile.GetUpperBound(0))
                             ReDim Preserve teile(teile.GetUpperBound(0) - 1)
                             tmp = Übersetze(tmp, teile)
-                            If tmp <> "" Then
-                                CType(Control, System.Windows.Forms.MenuItem).Text = tmp
+                            If tmp.Length > 0 Then
+                                tmpMenuItem.Text = tmp
                             End If
                         End If
                     Case "system.windows.forms.toolstripmenuitem"
                         Dim tmp As String, teile() As String
-                        If CStr(CType(Control, System.Windows.Forms.ToolStripMenuItem).Tag) <> "" Then
-                            teile = CStr(CType(Control, System.Windows.Forms.ToolStripMenuItem).Tag).Split(",")
+                        Dim tmpToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem = DirectCast(Control, System.Windows.Forms.ToolStripMenuItem)
+                        If Not String.IsNullOrEmpty(CStr(tmpToolStripMenuItem.Tag)) Then
+                            teile = CStr(tmpToolStripMenuItem.Tag).Split(","c)
                             tmp = teile(teile.GetUpperBound(0))
                             ReDim Preserve teile(teile.GetUpperBound(0) - 1)
                             tmp = Übersetze(tmp, teile)
-                            If tmp <> "" Then
-                                CType(Control, System.Windows.Forms.ToolStripMenuItem).Text = tmp
+                            If tmp.Length > 0 Then
+                                tmpToolStripMenuItem.Text = tmp
                             End If
                         End If
-                        For i As Int16 = 0 To CType(Control, System.Windows.Forms.ToolStripMenuItem).DropDownItems.Count - 1
-                            ÜbersetzeControl(CType(Control, System.Windows.Forms.ToolStripMenuItem).DropDownItems(i))
+                        For i As Int32 = 0 To tmpToolStripMenuItem.DropDownItems.Count - 1
+                            ÜbersetzeControl(tmpToolStripMenuItem.DropDownItems(i))
                         Next i
                     Case "system.windows.forms.toolstripbutton"
                         Dim tmp As String, teile() As String
-                        If CStr(CType(Control, System.Windows.Forms.ToolStripButton).Tag) <> "" Then
-                            teile = CStr(CType(Control, System.Windows.Forms.ToolStripButton).Tag).Split(",")
+                        Dim tmpToolStripButton As System.Windows.Forms.ToolStripButton = DirectCast(Control, System.Windows.Forms.ToolStripButton)
+                        If Not String.IsNullOrEmpty(CStr(tmpToolStripButton.Tag)) Then
+                            teile = CStr(tmpToolStripButton.Tag).Split(","c)
                             tmp = teile(teile.GetUpperBound(0))
                             ReDim Preserve teile(teile.GetUpperBound(0) - 1)
                             tmp = Übersetze(tmp, teile)
-                            If tmp <> "" Then
-                                CType(Control, System.Windows.Forms.ToolStripButton).Text = tmp
+                            If tmp.Length > 0 Then
+                                tmpToolStripButton.Text = tmp
                             End If
                         End If
                     Case "system.windows.forms.columnheader"
                         Dim tmp As String, teile() As String
-                        If CStr(CType(Control, System.Windows.Forms.ColumnHeader).Tag) <> "" Then
-                            teile = CStr(CType(Control, System.Windows.Forms.ColumnHeader).Tag).Split(",")
+                        Dim tmpColumnHeader As System.Windows.Forms.ColumnHeader = DirectCast(Control, System.Windows.Forms.ColumnHeader)
+                        If Not String.IsNullOrEmpty(CStr(tmpColumnHeader.Tag)) Then
+                            teile = CStr(tmpColumnHeader.Tag).Split(","c)
                             tmp = teile(teile.GetUpperBound(0))
                             ReDim Preserve teile(teile.GetUpperBound(0) - 1)
                             tmp = Übersetze(tmp, teile)
-                            If tmp <> "" Then
-                                CType(Control, System.Windows.Forms.ColumnHeader).Text = tmp
+                            If tmp.Length > 0 Then
+                                tmpColumnHeader.Text = tmp
                             End If
                         End If
                     Case "system.windows.forms.listviewgroup"
                         Dim tmp As String, teile() As String
-                        If CStr(CType(Control, System.Windows.Forms.ListViewGroup).Tag) <> "" Then
-                            teile = CStr(CType(Control, System.Windows.Forms.ListViewGroup).Tag).Split(",")
+                        Dim tmpListViewGroup As System.Windows.Forms.ListViewGroup = DirectCast(Control, System.Windows.Forms.ListViewGroup)
+                        If Not String.IsNullOrEmpty(CStr(tmpListViewGroup.Tag)) Then
+                            teile = CStr(tmpListViewGroup.Tag).Split(","c)
                             tmp = teile(teile.GetUpperBound(0))
                             ReDim Preserve teile(teile.GetUpperBound(0) - 1)
                             tmp = Übersetze(tmp, teile)
-                            If tmp <> "" Then
-                                CType(Control, System.Windows.Forms.ListViewGroup).Header = tmp
+                            If tmp.Length > 0 Then
+                                tmpListViewGroup.Header = tmp
                             End If
                         End If
                 End Select
@@ -327,38 +315,42 @@ Public Class clsÜbersetzen
 
         Try
             Dim tmp As String, teile() As String
-            If CStr(tmpControl.Tag) <> "" Then
-                teile = CStr(tmpControl.Tag).Split(",")
+            If Not String.IsNullOrEmpty(CStr(tmpControl.Tag)) Then
+                teile = CStr(tmpControl.Tag).Split(","c)
                 tmp = teile(teile.GetUpperBound(0))
                 ReDim Preserve teile(teile.GetUpperBound(0) - 1)
                 tmp = Übersetze(tmp, teile)
-                If tmp <> "" Then
+                If tmp.Length > 0 Then
                     tmpControl.Text = tmp
                 End If
             End If
 
             Select Case Control.GetType.ToString.ToLower
                 Case "system.windows.forms.listview"
-                    For i As Int16 = 0 To CType(Control, System.Windows.Forms.ListView).Columns.Count - 1
-                        ÜbersetzeControl(CType(Control, System.Windows.Forms.ListView).Columns(i))
+                    Dim tmpListView As System.Windows.Forms.ListView = DirectCast(Control, System.Windows.Forms.ListView)
+                    For i As Int32 = 0 To tmpListView.Columns.Count - 1
+                        ÜbersetzeControl(tmpListView.Columns(i))
                     Next i
-                    For i As Int16 = 0 To CType(Control, System.Windows.Forms.ListView).Groups.Count - 1
-                        ÜbersetzeControl(CType(Control, System.Windows.Forms.ListView).Groups(i))
+                    For i As Int32 = 0 To tmpListView.Groups.Count - 1
+                        ÜbersetzeControl(tmpListView.Groups(i))
                     Next i
                 Case "system.windows.forms.toolstrip"
-                    For i As Int16 = 0 To CType(Control, System.Windows.Forms.ToolStrip).Items.Count - 1
-                        ÜbersetzeControl(CType(Control, System.Windows.Forms.ToolStrip).Items(i))
+                    Dim tmpToolStrip As System.Windows.Forms.ToolStrip = DirectCast(Control, System.Windows.Forms.ToolStrip)
+                    For i As Int32 = 0 To tmpToolStrip.Items.Count - 1
+                        ÜbersetzeControl(tmpToolStrip.Items(i))
                     Next i
                 Case "system.windows.forms.menustrip"
-                    For i As Int16 = 0 To CType(Control, System.Windows.Forms.MenuStrip).Items.Count - 1
-                        ÜbersetzeControl(CType(Control, System.Windows.Forms.MenuStrip).Items(i))
+                    Dim tmpMenuStrip As System.Windows.Forms.MenuStrip = DirectCast(Control, System.Windows.Forms.MenuStrip)
+                    For i As Int32 = 0 To tmpMenuStrip.Items.Count - 1
+                        ÜbersetzeControl(tmpMenuStrip.Items(i))
                     Next i
                 Case "system.windows.forms.contextmenustrip"
-                    For i As Int16 = 0 To CType(Control, System.Windows.Forms.ContextMenuStrip).Items.Count - 1
-                        ÜbersetzeControl(CType(Control, System.Windows.Forms.ContextMenuStrip).Items(i))
+                    Dim tmpContextMenuStrip As System.Windows.Forms.ContextMenuStrip = DirectCast(Control, System.Windows.Forms.ContextMenuStrip)
+                    For i As Int32 = 0 To tmpContextMenuStrip.Items.Count - 1
+                        ÜbersetzeControl(tmpContextMenuStrip.Items(i))
                     Next i
                 Case Else
-                    For i As Int16 = 0 To tmpControl.Controls.Count - 1
+                    For i As Int32 = 0 To tmpControl.Controls.Count - 1
                         ÜbersetzeControl(tmpControl.Controls.Item(i))
                     Next i
             End Select
@@ -377,7 +369,7 @@ Public Class clsÜbersetzen
                             Return Zahl & "ième"
                     End Select
                 Case "english"
-                    Select Case CStr(Zahl).Substring(CStr(Zahl).Length - 1)
+                    Select Case CInt(CStr(Zahl).Substring(CStr(Zahl).Length - 1))
                         Case 1
                             Return Zahl & "st"
                         Case 2
@@ -431,7 +423,7 @@ Public Class clsAusdrücke
     End Property
 End Class
 
-Class clsAusdruck
+NotInheritable Class clsAusdruck
     Friend Ausdruck As String
     Friend Übersetzung As String
 End Class

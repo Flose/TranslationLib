@@ -16,3 +16,8 @@ D:\Dokumente und Einstellungen\Flose\Eigene Dateien\Visual Studio Codename Orcas
 D:\Dokumente und Einstellungen\Flose\Eigene Dateien\Visual Studio Codename Orcas\Projects\dllSprache\obj\Release\dllSprache.dll
 D:\Dokumente und Einstellungen\Flose\Eigene Dateien\Visual Studio Codename Orcas\Projects\dllSprache\obj\Release\dllSprache.xml
 D:\Dokumente und Einstellungen\Flose\Eigene Dateien\Visual Studio Codename Orcas\Projects\dllSprache\obj\Release\dllSprache.pdb
+C:\Users\Flose\Visual Studio 2008\Projects\dllSprache\bin\Release\dllSprache.dll
+C:\Users\Flose\Visual Studio 2008\Projects\dllSprache\obj\Release\ResolveAssemblyReference.cache
+C:\Users\Flose\Visual Studio 2008\Projects\dllSprache\obj\Release\dllSprache.Resources.resources
+C:\Users\Flose\Visual Studio 2008\Projects\dllSprache\obj\Release\dllSprache.vbproj.GenerateResource.Cache
+C:\Users\Flose\Visual Studio 2008\Projects\dllSprache\obj\Release\dllSprache.dll
