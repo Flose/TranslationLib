@@ -385,6 +385,8 @@ Public Class clsÜbersetzen
                                 Return Zahl & "th"
                         End Select
                     End If
+                Case "spanish"
+                    Return Zahl & "°"
                 Case Else
                     Return Zahl & "."
             End Select
