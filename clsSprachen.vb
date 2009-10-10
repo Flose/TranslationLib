@@ -17,11 +17,9 @@ Public Class cls‹bersetzen
                 Using Reader As System.IO.StreamReader = New System.IO.StreamReader(SprachenPfad & "/" & Sprache & ".lng", True)
                     Reader.ReadLine() 'Version 
                     Dim tmp As String = Reader.ReadToEnd
-                    'Reader.Close()
                     Return Load(Sprache, tmp)
                 End Using
             Catch
-                'If Reader IsNot Nothing Then Reader.Close()
                 Return False
             End Try
         Else
@@ -37,15 +35,16 @@ Public Class cls‹bersetzen
 #End If
         Try
             Dim tmp As Int32, tmpstring() As String = SprachText.Split(New String() {Environment.NewLine}, System.StringSplitOptions.RemoveEmptyEntries)
+            Dim tmpZeile As String
             For i As Int32 = 0 To tmpstring.Length - 1
                 Try
-                    tmpstring(i) = tmpstring(i).Trim(New Char() {ChrW(13), ChrW(10)})
-                    If tmpstring(i).Substring(0, 1) <> "'"c Then
-                        tmp = tmpstring(i).IndexOf("="c)
+                    tmpZeile = tmpstring(i).Trim(New Char() {ChrW(13), ChrW(10)})
+                    If tmpZeile(0) <> "'"c Then
+                        tmp = tmpZeile.IndexOf("="c)
                         If tmp > -1 Then
-                            Ausdr¸cke.Add(tmpstring(i).Substring(0, tmp), tmpstring(i).Substring(tmp + 1))
+                            Ausdr¸cke.Add(tmpZeile.Substring(0, tmp), tmpZeile.Substring(tmp + 1))
 #If DEBUG Then
-                            NichtVerwendeteAusdr¸cke.Add(tmpstring(i).Substring(0, tmp))
+                            NichtVerwendeteAusdr¸cke.Add(tmpZeile.Substring(0, tmp))
 #End If
                         End If
                     End If
@@ -91,7 +90,6 @@ Public Class cls‹bersetzen
                                 tmp = tmpstring.IndexOf("="c)
                                 If String.Compare(tmpstring.Substring(0, tmp).Trim, "sprachenname", True) = 0 Then
                                     SprachenName = tmpstring.Substring(tmp + 1)
-                                    Reader.Close()
                                     Return True
                                 End If
                             End If
@@ -126,7 +124,7 @@ Public Class cls‹bersetzen
             Next
         End If
         If Standard‹bersetzenText.Trim.Length > 0 Then
-            Standard‹bersetzen = New cls‹bersetzen(Directory, String.Empty)
+            Standard‹bersetzen = New cls‹bersetzen(String.Empty, String.Empty)
             Standard‹bersetzen.Load("Standard", Standard‹bersetzenText)
         Else
             Standard‹bersetzen = New cls‹bersetzen
