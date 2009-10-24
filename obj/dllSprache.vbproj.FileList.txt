@@ -1,9 +1,0 @@
-bin\Debug\dllSprache.dll
-bin\Debug\dllSprache.pdb
-bin\Debug\dllSprache.xml
-obj\Debug\ResolveAssemblyReference.cache
-obj\Debug\dllSprache.Resources.resources
-obj\Debug\dllSprache.vbproj.GenerateResource.Cache
-obj\Debug\dllSprache.dll
-obj\Debug\dllSprache.xml
-obj\Debug\dllSprache.pdb
