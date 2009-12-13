@@ -1,7 +1,7 @@
 Public Class clsÜbersetzen
-    Public Ausdrücke As New clsAusdrücke
-    Public Sprachen() As String, SprachenNamen() As String
-    Public SprachenPfad As String
+    Dim Ausdrücke As New clsAusdrücke
+    Public Sprachen As New clsSprachen
+    Dim SprachenPfad As String
     Public AktuelleSprache As String
 
     Dim StandardÜbersetzen As clsÜbersetzen
@@ -11,24 +11,34 @@ Public Class clsÜbersetzen
 #End If
 
     Function Load(ByVal Sprache As String) As Boolean
-        If System.IO.File.Exists(SprachenPfad & "/" & Sprache & ".lng") Then
-            Ausdrücke.Ausdruck = Nothing
-            Try
-                Using Reader As System.IO.StreamReader = New System.IO.StreamReader(SprachenPfad & "/" & Sprache & ".lng", True)
-                    Reader.ReadLine() 'Version 
-                    Dim tmp As String = Reader.ReadToEnd
-                    Return Load(Sprache, tmp)
-                End Using
-            Catch
+        Dim Sprachdatei As String = SprachenPfad & "/" & Sprache & ".lng"
+        Dim SprachIndex As Int32 = Sprachen.IndexOf(Sprache)
+        If SprachIndex > -1 Then
+            If System.IO.File.Exists(Sprachdatei) Then
+                Try
+                    Using Reader As New System.IO.StreamReader(Sprachdatei, True)
+                        Reader.ReadLine() 'Version 
+                        Return Load(Sprache, Reader.ReadToEnd)
+                    End Using
+                Catch
+                    If Not String.IsNullOrEmpty(Sprachen(SprachIndex).SprachText) Then
+                        Return Load(Sprache, Sprachen(SprachIndex).SprachText)
+                    Else
+                        Return False
+                    End If
+                End Try
+            ElseIf Not String.IsNullOrEmpty(Sprachen(SprachIndex).SprachText) Then
+                Return Load(Sprache, Sprachen(SprachIndex).SprachText)
+            Else
                 Return False
-            End Try
+            End If
         Else
             Return False
         End If
     End Function
 
     Function Load(ByVal Sprache As String, ByVal SprachText As String) As Boolean
-        Ausdrücke.Ausdruck = Nothing
+        Ausdrücke.Clear()
 #If DEBUG Then
         NichtVerwendeteAusdrücke.Clear()
         FehlendeAusdrücke.Clear()
@@ -53,13 +63,18 @@ Public Class clsÜbersetzen
             Next i
         Catch
         End Try
-        If Ausdrücke.Count > 0 Then AktuelleSprache = Sprache : Return True Else Return False
+        If Ausdrücke.Count > 0 Then
+            AktuelleSprache = Sprache
+            Return True
+        Else
+            Return False
+        End If
     End Function
 
     Function ÜberprüfeSprache(ByVal Sprache As String) As String
         If Sprachen Is Nothing Then
             Return String.Empty
-        ElseIf Array.IndexOf(Sprachen, Sprache) > -1 Then
+        ElseIf Sprachen.IndexOf(Sprache) > -1 Then
             'sprache ist verfügbar
             Return Sprache
         Else 'Wenn zu uberprüfende Sprache nicht verfügbar ist
@@ -67,9 +82,9 @@ Public Class clsÜbersetzen
             Sprache = My.Application.Culture.EnglishName.Substring(0, My.Application.Culture.EnglishName.IndexOf(" ("))
 
             'schauen ob systemsprache verfügbar ist
-            If Array.IndexOf(Sprachen, Sprache) > -1 Then
+            If Sprachen.IndexOf(Sprache) > -1 Then
                 Return Sprache
-            ElseIf Array.IndexOf(Sprachen, "English") > -1 Then 'wenn englisch verfügbar ist
+            ElseIf Sprachen.IndexOf("English", False) > -1 Then 'wenn englisch verfügbar ist
                 Return "English"
             Else
                 Return String.Empty
@@ -109,17 +124,11 @@ Public Class clsÜbersetzen
         Dim tmp As String
         SprachenPfad = Directory.Replace("\"c, "/"c)
         If System.IO.Directory.Exists(SprachenPfad) Then
-            Dim i As Int32 = -1
             'Sprachdateien finden
             For Each File As String In System.IO.Directory.GetFiles(SprachenPfad, "*.lng", IO.SearchOption.TopDirectoryOnly)
                 tmp = String.Empty
                 If ÜberprüfeDatei(File, tmp) Then
-                    i += 1
-                    ReDim Preserve Sprachen(i)
-                    ReDim Preserve SprachenNamen(i)
-
-                    Sprachen(i) = System.IO.Path.GetFileNameWithoutExtension(File)
-                    SprachenNamen(i) = tmp
+                    Sprachen.Add(System.IO.Path.GetFileNameWithoutExtension(File), tmp)
                 End If
             Next
         End If
@@ -139,13 +148,13 @@ Public Class clsÜbersetzen
             Dim tmp As Int32 = Ausdrücke.IndexOfÜbersetzung(Übersetzung)
             If tmp = -1 Then
                 tmp = StandardÜbersetzen.Ausdrücke.IndexOfÜbersetzung(Übersetzung)
-                If tmp = -1 OrElse String.IsNullOrEmpty(StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Ausdruck) Then
+                If tmp = -1 OrElse String.IsNullOrEmpty(StandardÜbersetzen.Ausdrücke(tmp).Ausdruck) Then
                     Return String.Empty
                 Else
-                    Return StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Ausdruck
+                    Return StandardÜbersetzen.Ausdrücke(tmp).Ausdruck
                 End If
             Else
-                Return Ausdrücke.Ausdruck(tmp).Ausdruck
+                Return Ausdrücke(tmp).Ausdruck
             End If
         End Get
     End Property
@@ -155,13 +164,13 @@ Public Class clsÜbersetzen
             Dim tmp As Int32 = Ausdrücke.IndexOfÜbersetzung(Übersetzung)
             If tmp = -1 Then
                 tmp = StandardÜbersetzen.Ausdrücke.IndexOfÜbersetzung(Übersetzung)
-                If tmp = -1 OrElse String.IsNullOrEmpty(StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Ausdruck) Then
+                If tmp = -1 OrElse String.IsNullOrEmpty(StandardÜbersetzen.Ausdrücke(tmp).Ausdruck) Then
                     Return Standard
                 Else
-                    Return StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Ausdruck
+                    Return StandardÜbersetzen.Ausdrücke(tmp).Ausdruck
                 End If
             Else
-                Return Ausdrücke.Ausdruck(tmp).Ausdruck
+                Return Ausdrücke(tmp).Ausdruck
             End If
         End Get
     End Property
@@ -169,22 +178,22 @@ Public Class clsÜbersetzen
     ReadOnly Property Übersetze(ByVal Ausdruck As String) As String
         Get
             Dim tmp As Int32 = Ausdrücke.IndexOf(Ausdruck)
-            If tmp = -1 OrElse String.IsNullOrEmpty(Ausdrücke.Ausdruck(tmp).Übersetzung) Then
+            If tmp = -1 OrElse String.IsNullOrEmpty(Ausdrücke(tmp).Übersetzung) Then
 #If DEBUG Then
                 If Not FehlendeAusdrücke.Contains(Ausdruck) Then FehlendeAusdrücke.Add(Ausdruck)
 #End If
                 'schauen ob in standard ist
                 tmp = StandardÜbersetzen.Ausdrücke.IndexOf(Ausdruck)
-                If tmp = -1 OrElse String.IsNullOrEmpty(StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Übersetzung) Then
+                If tmp = -1 OrElse String.IsNullOrEmpty(StandardÜbersetzen.Ausdrücke(tmp).Übersetzung) Then
                     Return Ausdruck
                 Else
-                    Return StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Übersetzung.Replace("\n\n", Environment.NewLine)
+                    Return StandardÜbersetzen.Ausdrücke(tmp).Übersetzung.Replace("\n\n", Environment.NewLine)
                 End If
             Else
 #If DEBUG Then
                 If NichtVerwendeteAusdrücke.Contains(Ausdruck) Then NichtVerwendeteAusdrücke.Remove(Ausdruck)
 #End If
-                Return Ausdrücke.Ausdruck(tmp).Übersetzung.Replace("\n\n", Environment.NewLine)
+                Return Ausdrücke(tmp).Übersetzung.Replace("\n\n", Environment.NewLine)
             End If
         End Get
     End Property
@@ -193,23 +202,22 @@ Public Class clsÜbersetzen
         Get
             Dim tmpText As String
             Dim tmp As Int32 = Ausdrücke.IndexOf(Ausdruck), Text As String
-            If tmp = -1 OrElse String.IsNullOrEmpty(Ausdrücke.Ausdruck(tmp).Übersetzung) Then
+            If tmp = -1 OrElse String.IsNullOrEmpty(Ausdrücke(tmp).Übersetzung) Then
 #If DEBUG Then
                 If Not FehlendeAusdrücke.Contains(Ausdruck) Then FehlendeAusdrücke.Add(Ausdruck)
 #End If
-                'Text = Standard
                 'schauen ob in standard ist
                 tmp = StandardÜbersetzen.Ausdrücke.IndexOf(Ausdruck)
-                If tmp = -1 OrElse String.IsNullOrEmpty(StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Übersetzung) Then
+                If tmp = -1 OrElse String.IsNullOrEmpty(StandardÜbersetzen.Ausdrücke(tmp).Übersetzung) Then
                     Text = Ausdruck
                 Else
-                    Text = StandardÜbersetzen.Ausdrücke.Ausdruck(tmp).Übersetzung
+                    Text = StandardÜbersetzen.Ausdrücke(tmp).Übersetzung
                 End If
             Else
 #If DEBUG Then
                 If NichtVerwendeteAusdrücke.Contains(Ausdruck) Then NichtVerwendeteAusdrücke.Remove(Ausdruck)
 #End If
-                Text = Ausdrücke.Ausdruck(tmp).Übersetzung
+                Text = Ausdrücke(tmp).Übersetzung
             End If
             If Args IsNot Nothing AndAlso Args.Length > 0 Then
                 For i As Int32 = 0 To Args.GetUpperBound(0)
@@ -228,7 +236,6 @@ Public Class clsÜbersetzen
                     Exit Do
                 Catch ex As FormatException
                     ReDim Preserve Args(Args.Length)
-                    'Debug.Print(Ausdruck & " " & Text)
                 End Try
             Loop
             Return tmpText.Replace("\n\n", Environment.NewLine)
@@ -394,12 +401,12 @@ Public Class clsÜbersetzen
     End Function
 End Class
 
-Public Class clsAusdrücke
-    Friend Ausdruck() As clsAusdruck
+Friend Class clsAusdrücke
+    Inherits List(Of clsAusdruck)
 
-    Function IndexOf(ByVal Ausdruck As String) As Int32
+    Shadows Function IndexOf(ByVal Ausdruck As String) As Int32
         For i As Int32 = 0 To Count - 1
-            If String.Compare(Me.Ausdruck(i).Ausdruck, Ausdruck, True) = 0 Then
+            If String.Compare(Me(i).Ausdruck, Ausdruck, True) = 0 Then
                 Return i
             End If
         Next i
@@ -408,28 +415,46 @@ Public Class clsAusdrücke
 
     Function IndexOfÜbersetzung(ByVal Übersetzung As String) As Int32
         For i As Int32 = 0 To Count - 1
-            If String.Compare(Me.Ausdruck(i).Übersetzung, Übersetzung, True) = 0 AndAlso String.Compare(Me.Ausdruck(i).Ausdruck, "sprachenname", True) <> 0 Then
+            If String.Compare(Me(i).Übersetzung, Übersetzung, True) = 0 AndAlso String.Compare(Me(i).Ausdruck, "sprachenname", True) <> 0 Then
                 Return i
             End If
         Next i
         Return -1
     End Function
 
-    Sub Add(ByVal Ausdruck As String, ByVal Übersetzung As String)
-        ReDim Preserve Me.Ausdruck(Count)
-        Me.Ausdruck(Count - 1) = New clsAusdruck
-        Me.Ausdruck(Count - 1).Ausdruck = Ausdruck
-        Me.Ausdruck(Count - 1).Übersetzung = Übersetzung
+    Overloads Sub Add(ByVal Ausdruck As String, ByVal Übersetzung As String)
+        Add(New clsAusdruck With {.Ausdruck = Ausdruck, .Übersetzung = Übersetzung})
     End Sub
-
-    ReadOnly Property Count() As Int32
-        Get
-            If Ausdruck Is Nothing Then Return 0 Else Return Ausdruck.Length
-        End Get
-    End Property
 End Class
 
-NotInheritable Class clsAusdruck
+Friend NotInheritable Class clsAusdruck
     Friend Ausdruck As String
     Friend Übersetzung As String
+End Class
+
+Public Class clsSprachen
+    Inherits List(Of clsSprache)
+
+    Shadows Function IndexOf(ByVal EnglishName As String, Optional ByVal BeachteGroßKlein As Boolean = True) As Int32
+        For i As Int32 = 0 To Me.Count - 1
+            If String.Compare(Me(i).EnglishName, EnglishName, Not BeachteGroßKlein) = 0 Then
+                Return i
+            End If
+        Next
+        Return -1
+    End Function
+
+    Overloads Sub Add(ByVal EnglishName As String, ByVal SprachName As String)
+        Add(New clsSprache() With {.EnglishName = EnglishName, .SprachName = SprachName})
+    End Sub
+
+    Overloads Sub Add(ByVal EnglishName As String, ByVal SprachName As String, ByVal SprachText As String)
+        Add(New clsSprache() With {.EnglishName = EnglishName, .SprachName = SprachName, .SprachText = SprachText})
+    End Sub
+End Class
+
+Public Class clsSprache
+    Public EnglishName As String
+    Public SprachName As String
+    Public SprachText As String
 End Class
