@@ -92,7 +92,7 @@
         End If
     End Function
 
-    Shared Function ÜberprüfeDatei(ByVal SprachDatei As String, Optional ByRef SprachenName As String = String.Empty) As Boolean
+    Shared Function ÜberprüfeDatei(ByVal SprachDatei As String, Optional ByRef SprachenName As String = "") As Boolean
         If System.IO.File.Exists(SprachDatei) Then
             Try
                 Using Reader As New System.IO.StreamReader(SprachDatei, True)
