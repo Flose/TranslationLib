@@ -244,72 +244,42 @@
 
     Sub ÜbersetzeControl(ByVal Control As Object)
         Dim tmpControl As System.Windows.Forms.Control = TryCast(Control, System.Windows.Forms.Control)
-        Dim tmp As String, teile() As String, tmpTag As String
+        Dim tmp As String
         If tmpControl Is Nothing Then
             Try
                 Select Case Control.GetType.ToString.ToLower
                     Case "system.windows.forms.menuitem"
                         Dim tmpMenuItem As Windows.Forms.MenuItem = DirectCast(Control, System.Windows.Forms.MenuItem)
-                        tmpTag = TryCast(tmpMenuItem.Tag, String)
-                        If tmpTag IsNot Nothing AndAlso tmpTag.Length > 0 Then
-                            teile = tmpTag.Split(","c)
-                            tmp = teile(teile.GetUpperBound(0))
-                            ReDim Preserve teile(teile.GetUpperBound(0) - 1)
-                            tmp = Übersetze(tmp, teile)
-                            If tmp.Length > 0 Then
-                                tmpMenuItem.Text = tmp
-                            End If
+                        tmp = ÜbersetzeControlTag(tmpMenuItem.Tag)
+                        If tmp.Length > 0 Then
+                            tmpMenuItem.Text = tmp
                         End If
                     Case "system.windows.forms.toolstripmenuitem"
                         Dim tmpToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem = DirectCast(Control, System.Windows.Forms.ToolStripMenuItem)
-                        tmpTag = TryCast(tmpToolStripMenuItem.Tag, String)
-                        If tmpTag IsNot Nothing AndAlso tmpTag.Length > 0 Then
-                            teile = tmpTag.Split(","c)
-                            tmp = teile(teile.GetUpperBound(0))
-                            ReDim Preserve teile(teile.GetUpperBound(0) - 1)
-                            tmp = Übersetze(tmp, teile)
-                            If tmp.Length > 0 Then
-                                tmpToolStripMenuItem.Text = tmp
-                            End If
+                        tmp = ÜbersetzeControlTag(tmpToolStripMenuItem.Tag)
+                        If tmp.Length > 0 Then
+                            tmpToolStripMenuItem.Text = tmp
                         End If
                         For i As Int32 = 0 To tmpToolStripMenuItem.DropDownItems.Count - 1
                             ÜbersetzeControl(tmpToolStripMenuItem.DropDownItems(i))
                         Next i
                     Case "system.windows.forms.toolstripbutton"
                         Dim tmpToolStripButton As System.Windows.Forms.ToolStripButton = DirectCast(Control, System.Windows.Forms.ToolStripButton)
-                        tmpTag = TryCast(tmpToolStripButton.Tag, String)
-                        If tmpTag IsNot Nothing AndAlso tmpTag.Length > 0 Then
-                            teile = tmpTag.Split(","c)
-                            tmp = teile(teile.GetUpperBound(0))
-                            ReDim Preserve teile(teile.GetUpperBound(0) - 1)
-                            tmp = Übersetze(tmp, teile)
-                            If tmp.Length > 0 Then
-                                tmpToolStripButton.Text = tmp
-                            End If
+                        tmp = ÜbersetzeControlTag(tmpToolStripButton.Tag)
+                        If tmp.Length > 0 Then
+                            tmpToolStripButton.Text = tmp
                         End If
                     Case "system.windows.forms.columnheader"
                         Dim tmpColumnHeader As System.Windows.Forms.ColumnHeader = DirectCast(Control, System.Windows.Forms.ColumnHeader)
-                        tmpTag = TryCast(tmpColumnHeader.Tag, String)
-                        If tmpTag IsNot Nothing AndAlso tmpTag.Length > 0 Then
-                            teile = tmpTag.Split(","c)
-                            tmp = teile(teile.GetUpperBound(0))
-                            ReDim Preserve teile(teile.GetUpperBound(0) - 1)
-                            tmp = Übersetze(tmp, teile)
-                            If tmp.Length > 0 Then
-                                tmpColumnHeader.Text = tmp
-                            End If
+                        tmp = ÜbersetzeControlTag(tmpColumnHeader.Tag)
+                        If tmp.Length > 0 Then
+                            tmpColumnHeader.Text = tmp
                         End If
                     Case "system.windows.forms.listviewgroup"
                         Dim tmpListViewGroup As System.Windows.Forms.ListViewGroup = DirectCast(Control, System.Windows.Forms.ListViewGroup)
-                        tmpTag = TryCast(tmpListViewGroup.Tag, String)
-                        If tmpTag IsNot Nothing AndAlso tmpTag.Length > 0 Then
-                            teile = tmpTag.Split(","c)
-                            tmp = teile(teile.GetUpperBound(0))
-                            ReDim Preserve teile(teile.GetUpperBound(0) - 1)
-                            tmp = Übersetze(tmp, teile)
-                            If tmp.Length > 0 Then
-                                tmpListViewGroup.Header = tmp
-                            End If
+                        tmp = ÜbersetzeControlTag(tmpListViewGroup.Tag)
+                        If tmp.Length > 0 Then
+                            tmpListViewGroup.Header = tmp
                         End If
                 End Select
             Catch ex As Exception
@@ -319,15 +289,9 @@
             End Try
         Else
             Try
-                tmpTag = TryCast(tmpControl.Tag, String)
-                If tmpTag IsNot Nothing AndAlso tmpTag.Length > 0 Then
-                    teile = tmpTag.Split(","c)
-                    tmp = teile(teile.GetUpperBound(0))
-                    ReDim Preserve teile(teile.GetUpperBound(0) - 1)
-                    tmp = Übersetze(tmp, teile)
-                    If tmp.Length > 0 Then
-                        tmpControl.Text = tmp
-                    End If
+                tmp = ÜbersetzeControlTag(tmpControl.Tag)
+                If tmp.Length > 0 Then
+                    tmpControl.Text = tmp
                 End If
 
                 Select Case Control.GetType.ToString.ToLower
@@ -363,6 +327,19 @@
             End Try
         End If
     End Sub
+
+    Private Function ÜbersetzeControlTag(ByVal Tag As Object) As String
+        Dim tmp As String, teile() As String
+        Dim tmpTag As String = TryCast(Tag, String)
+        If Not String.IsNullOrEmpty(tmpTag) Then
+            teile = tmpTag.Split(","c)
+            tmp = teile(teile.GetUpperBound(0))
+            ReDim Preserve teile(teile.GetUpperBound(0) - 1)
+            Return Übersetze(tmp, teile)
+        Else
+            Return String.Empty
+        End If
+    End Function
 
     Function GetAufzählungVon(ByVal Zahl As Int32) As String
         If AktuelleSprache IsNot Nothing Then
