@@ -14,9 +14,9 @@
         Dim Sprachdatei As String = IO.Path.Combine(SprachenPfad, Sprache & ".lng")
         Dim SprachIndex As Int32 = Sprachen.IndexOf(Sprache)
         If SprachIndex > -1 Then
-            If System.IO.File.Exists(Sprachdatei) Then
+            If IO.File.Exists(Sprachdatei) Then
                 Try
-                    Using Reader As New System.IO.StreamReader(Sprachdatei, True)
+                    Using Reader As New IO.StreamReader(Sprachdatei, True)
                         Reader.ReadLine() 'Version 
                         Return Load(Sprache, Reader.ReadToEnd)
                     End Using
@@ -93,9 +93,9 @@
     End Function
 
     Shared Function ÜberprüfeDatei(ByVal SprachDatei As String, Optional ByRef SprachenName As String = "") As Boolean
-        If System.IO.File.Exists(SprachDatei) Then
+        If IO.File.Exists(SprachDatei) Then
             Try
-                Using Reader As New System.IO.StreamReader(SprachDatei, True)
+                Using Reader As New IO.StreamReader(SprachDatei, True)
                     Reader.ReadLine()
                     Dim tmp As Int32, tmpstring As String
                     Do Until Reader.Peek = -1
@@ -123,12 +123,12 @@
     Sub New(ByVal Directory As String, ByVal StandardÜbersetzenText As String)
         Dim tmp As String
         SprachenPfad = Directory
-        If System.IO.Directory.Exists(SprachenPfad) Then
+        If IO.Directory.Exists(SprachenPfad) Then
             'Sprachdateien finden
-            For Each File As String In System.IO.Directory.GetFiles(SprachenPfad, "*.lng", IO.SearchOption.TopDirectoryOnly)
+            For Each File As String In IO.Directory.GetFiles(SprachenPfad, "*.lng", IO.SearchOption.TopDirectoryOnly)
                 tmp = String.Empty
                 If ÜberprüfeDatei(File, tmp) Then
-                    Sprachen.Add(System.IO.Path.GetFileNameWithoutExtension(File), tmp)
+                    Sprachen.Add(IO.Path.GetFileNameWithoutExtension(File), tmp)
                 End If
             Next
         End If
