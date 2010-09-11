@@ -400,7 +400,10 @@ Friend Class clsAusdrücke
     End Function
 
     Overloads Sub Add(ByVal Ausdruck As String, ByVal Übersetzung As String)
-        Add(New clsAusdruck With {.Ausdruck = Ausdruck, .Übersetzung = Übersetzung})
+        Dim tmp As New clsAusdruck
+        tmp.Ausdruck = Ausdruck
+        tmp.Übersetzung = Übersetzung
+        Add(tmp)
     End Sub
 End Class
 
@@ -422,11 +425,18 @@ Public Class clsSprachen
     End Function
 
     Overloads Sub Add(ByVal EnglishName As String, ByVal SprachName As String)
-        Add(New clsSprache() With {.EnglishName = EnglishName, .SprachName = SprachName})
+        Dim tmp As New clsSprache() 
+        tmp.EnglishName = EnglishName
+        tmp.SprachName = SprachName
+        Add(tmp)
     End Sub
 
     Overloads Sub Add(ByVal EnglishName As String, ByVal SprachName As String, ByVal SprachText As String)
-        Add(New clsSprache() With {.EnglishName = EnglishName, .SprachName = SprachName, .SprachText = SprachText})
+        Dim tmp as New clsSprache() 
+        tmp.EnglishName = EnglishName
+        tmp.SprachName = SprachName
+        tmp.SprachText = SprachText
+        Add(tmp)
     End Sub
 End Class
 
