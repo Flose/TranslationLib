@@ -11,7 +11,7 @@
 #End If
 
     Function Load(ByVal Sprache As String) As Boolean
-        Dim Sprachdatei As String = SprachenPfad & System.IO.Path.DirectorySeparatorChar & Sprache & ".lng"
+        Dim Sprachdatei As String = IO.Path.Combine(SprachenPfad, Sprache & ".lng")
         Dim SprachIndex As Int32 = Sprachen.IndexOf(Sprache)
         If SprachIndex > -1 Then
             If System.IO.File.Exists(Sprachdatei) Then
