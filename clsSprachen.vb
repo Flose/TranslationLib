@@ -79,7 +79,7 @@
             Return Sprache
         Else 'Wenn zu uberprüfende Sprache nicht verfügbar ist
             'system sprache finden
-            Sprache = My.Application.Culture.EnglishName.Substring(0, My.Application.Culture.EnglishName.IndexOf(" ("))
+            Sprache = My.Application.Culture.EnglishName.Substring(0, My.Application.Culture.EnglishName.IndexOf(" (", StringComparison.Ordinal))
 
             'schauen ob systemsprache verfügbar ist
             If Sprachen.IndexOf(Sprache) > -1 Then
@@ -103,7 +103,7 @@
                             tmpstring = Reader.ReadLine
                             If tmpstring.Length > 0 AndAlso tmpstring(0) <> "'"c Then
                                 tmp = tmpstring.IndexOf("="c)
-                                If String.Compare(tmpstring.Substring(0, tmp).Trim, "sprachenname", True) = 0 Then
+                                If String.Compare(tmpstring.Substring(0, tmp).Trim, "sprachenname", StringComparison.OrdinalIgnoreCase) = 0 Then
                                     SprachenName = tmpstring.Substring(tmp + 1)
                                     Return True
                                 End If
@@ -247,41 +247,41 @@
         Dim tmp As String
         If tmpControl Is Nothing Then
             Try
-                Select Case Control.GetType.ToString.ToLower
-                    Case "system.windows.forms.menuitem"
-                        Dim tmpMenuItem As Windows.Forms.MenuItem = DirectCast(Control, System.Windows.Forms.MenuItem)
-                        tmp = ÜbersetzeControlTag(tmpMenuItem.Tag)
-                        If tmp.Length > 0 Then
-                            tmpMenuItem.Text = tmp
-                        End If
-                    Case "system.windows.forms.toolstripmenuitem"
-                        Dim tmpToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem = DirectCast(Control, System.Windows.Forms.ToolStripMenuItem)
-                        tmp = ÜbersetzeControlTag(tmpToolStripMenuItem.Tag)
-                        If tmp.Length > 0 Then
-                            tmpToolStripMenuItem.Text = tmp
-                        End If
-                        For i As Int32 = 0 To tmpToolStripMenuItem.DropDownItems.Count - 1
-                            ÜbersetzeControl(tmpToolStripMenuItem.DropDownItems(i))
-                        Next i
-                    Case "system.windows.forms.toolstripbutton"
-                        Dim tmpToolStripButton As System.Windows.Forms.ToolStripButton = DirectCast(Control, System.Windows.Forms.ToolStripButton)
-                        tmp = ÜbersetzeControlTag(tmpToolStripButton.Tag)
-                        If tmp.Length > 0 Then
-                            tmpToolStripButton.Text = tmp
-                        End If
-                    Case "system.windows.forms.columnheader"
-                        Dim tmpColumnHeader As System.Windows.Forms.ColumnHeader = DirectCast(Control, System.Windows.Forms.ColumnHeader)
-                        tmp = ÜbersetzeControlTag(tmpColumnHeader.Tag)
-                        If tmp.Length > 0 Then
-                            tmpColumnHeader.Text = tmp
-                        End If
-                    Case "system.windows.forms.listviewgroup"
-                        Dim tmpListViewGroup As System.Windows.Forms.ListViewGroup = DirectCast(Control, System.Windows.Forms.ListViewGroup)
-                        tmp = ÜbersetzeControlTag(tmpListViewGroup.Tag)
-                        If tmp.Length > 0 Then
-                            tmpListViewGroup.Header = tmp
-                        End If
-                End Select
+                Dim type As String = Control.GetType.ToString
+                If String.Compare(type, "system.windows.forms.menuitem", StringComparison.OrdinalIgnoreCase) = 0 Then
+                    Dim tmpMenuItem As Windows.Forms.MenuItem = DirectCast(Control, System.Windows.Forms.MenuItem)
+                    tmp = ÜbersetzeControlTag(tmpMenuItem.Tag)
+                    If tmp.Length > 0 Then
+                        tmpMenuItem.Text = tmp
+                    End If
+                ElseIf String.Compare(type, "system.windows.forms.toolstripmenuitem", StringComparison.OrdinalIgnoreCase) = 0 Then
+                    Dim tmpToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem = DirectCast(Control, System.Windows.Forms.ToolStripMenuItem)
+                    tmp = ÜbersetzeControlTag(tmpToolStripMenuItem.Tag)
+                    If tmp.Length > 0 Then
+                        tmpToolStripMenuItem.Text = tmp
+                    End If
+                    For i As Int32 = 0 To tmpToolStripMenuItem.DropDownItems.Count - 1
+                        ÜbersetzeControl(tmpToolStripMenuItem.DropDownItems(i))
+                    Next i
+                ElseIf String.Compare(type, "system.windows.forms.toolstripbutton", StringComparison.OrdinalIgnoreCase) = 0 Then
+                    Dim tmpToolStripButton As System.Windows.Forms.ToolStripButton = DirectCast(Control, System.Windows.Forms.ToolStripButton)
+                    tmp = ÜbersetzeControlTag(tmpToolStripButton.Tag)
+                    If tmp.Length > 0 Then
+                        tmpToolStripButton.Text = tmp
+                    End If
+                ElseIf String.Compare(type, "system.windows.forms.columnheader", StringComparison.OrdinalIgnoreCase) = 0 Then
+                    Dim tmpColumnHeader As System.Windows.Forms.ColumnHeader = DirectCast(Control, System.Windows.Forms.ColumnHeader)
+                    tmp = ÜbersetzeControlTag(tmpColumnHeader.Tag)
+                    If tmp.Length > 0 Then
+                        tmpColumnHeader.Text = tmp
+                    End If
+                ElseIf String.Compare(type, "system.windows.forms.listviewgroup", StringComparison.OrdinalIgnoreCase) = 0 Then
+                    Dim tmpListViewGroup As System.Windows.Forms.ListViewGroup = DirectCast(Control, System.Windows.Forms.ListViewGroup)
+                    tmp = ÜbersetzeControlTag(tmpListViewGroup.Tag)
+                    If tmp.Length > 0 Then
+                        tmpListViewGroup.Header = tmp
+                    End If
+                End If
             Catch ex As Exception
 #If DEBUG Then
                 Debug.Print(ex.Message & ex.StackTrace)
@@ -294,32 +294,32 @@
                     tmpControl.Text = tmp
                 End If
 
-                Select Case Control.GetType.ToString.ToLower
-                    Case "system.windows.forms.listview"
-                        Dim tmpListView As System.Windows.Forms.ListView = DirectCast(Control, System.Windows.Forms.ListView)
-                        For Each column As System.Windows.Forms.ColumnHeader In tmpListView.Columns
-                            ÜbersetzeControl(column)
-                        Next
-                        For Each group As System.Windows.Forms.ListViewGroup In tmpListView.Groups
-                            ÜbersetzeControl(group)
-                        Next
-                    Case "system.windows.forms.toolstrip"
-                        For Each item As System.Windows.Forms.ToolStripItem In DirectCast(Control, System.Windows.Forms.ToolStrip).Items
-                            ÜbersetzeControl(item)
-                        Next
-                    Case "system.windows.forms.menustrip"
-                        For Each item As System.Windows.Forms.ToolStripItem In DirectCast(Control, System.Windows.Forms.MenuStrip).Items
-                            ÜbersetzeControl(item)
-                        Next
-                    Case "system.windows.forms.contextmenustrip"
-                        For Each item As System.Windows.Forms.ToolStripItem In DirectCast(Control, System.Windows.Forms.ContextMenuStrip).Items
-                            ÜbersetzeControl(item)
-                        Next
-                    Case Else
-                        For Each childcontrol As Windows.Forms.Control In tmpControl.Controls
-                            ÜbersetzeControl(childcontrol)
-                        Next
-                End Select
+                Dim type As String = Control.GetType.ToString
+                If String.Compare(type, "system.windows.forms.listview", StringComparison.OrdinalIgnoreCase) = 0 Then
+                    Dim tmpListView As System.Windows.Forms.ListView = DirectCast(Control, System.Windows.Forms.ListView)
+                    For Each column As System.Windows.Forms.ColumnHeader In tmpListView.Columns
+                        ÜbersetzeControl(column)
+                    Next
+                    For Each group As System.Windows.Forms.ListViewGroup In tmpListView.Groups
+                        ÜbersetzeControl(group)
+                    Next
+                ElseIf String.Compare(type, "system.windows.forms.toolstrip", StringComparison.OrdinalIgnoreCase) = 0 Then
+                    For Each item As System.Windows.Forms.ToolStripItem In DirectCast(Control, System.Windows.Forms.ToolStrip).Items
+                        ÜbersetzeControl(item)
+                    Next
+                ElseIf String.Compare(type, "system.windows.forms.menustrip", StringComparison.OrdinalIgnoreCase) = 0 Then
+                    For Each item As System.Windows.Forms.ToolStripItem In DirectCast(Control, System.Windows.Forms.MenuStrip).Items
+                        ÜbersetzeControl(item)
+                    Next
+                ElseIf String.Compare(type, "system.windows.forms.contextmenustrip", StringComparison.OrdinalIgnoreCase) = 0 Then
+                    For Each item As System.Windows.Forms.ToolStripItem In DirectCast(Control, System.Windows.Forms.ContextMenuStrip).Items
+                        ÜbersetzeControl(item)
+                    Next
+                Else
+                    For Each childcontrol As Windows.Forms.Control In tmpControl.Controls
+                        ÜbersetzeControl(childcontrol)
+                    Next
+                End If
             Catch ex As Exception
 #If DEBUG Then
                 Debug.Print(ex.Message & ex.StackTrace)
@@ -343,35 +343,34 @@
 
     Function GetAufzählungVon(ByVal Zahl As Int32) As String
         If AktuelleSprache IsNot Nothing Then
-            Select Case AktuelleSprache.ToLower
-                Case "french"
-                    Select Case Zahl
-                        Case 1
-                            Return "1ère"
+            If String.Compare(AktuelleSprache, "french", StringComparison.OrdinalIgnoreCase) = 0 Then
+                Select Case Zahl
+                    Case 1
+                        Return "1ère"
+                    Case Else
+                        Return Zahl & "ième"
+                End Select
+            ElseIf String.Compare(AktuelleSprache, "english", StringComparison.OrdinalIgnoreCase) = 0 Then
+                Dim tmpZahl As String = CStr(Zahl)
+                If tmpZahl.Length > 1 AndAlso tmpZahl(tmpZahl.Length - 2) = "1"c Then
+                    Return Zahl & "th" '11th, 12th
+                Else
+                    Select Case tmpZahl(tmpZahl.Length - 1)
+                        Case "1"c
+                            Return Zahl & "st"
+                        Case "2"c
+                            Return Zahl & "nd"
+                        Case "3"c
+                            Return Zahl & "rd"
                         Case Else
-                            Return Zahl & "ième"
+                            Return Zahl & "th"
                     End Select
-                Case "english"
-                    Dim tmpZahl As String = CStr(Zahl)
-                    If tmpZahl.Length > 1 AndAlso tmpZahl(tmpZahl.Length - 2) = "1"c Then
-                        Return Zahl & "th" '11th, 12th
-                    Else
-                        Select Case tmpZahl(tmpZahl.Length - 1)
-                            Case "1"c
-                                Return Zahl & "st"
-                            Case "2"c
-                                Return Zahl & "nd"
-                            Case "3"c
-                                Return Zahl & "rd"
-                            Case Else
-                                Return Zahl & "th"
-                        End Select
-                    End If
-                Case "spanish"
-                    Return Zahl & "°"
-                Case Else
-                    Return Zahl & "."
-            End Select
+                End If
+            ElseIf String.Compare(AktuelleSprache, "spanish", StringComparison.OrdinalIgnoreCase) = 0 Then
+                Return Zahl & "°"
+            Else
+                Return Zahl & "."
+            End If
         Else
             Return Zahl & "."
         End If
@@ -383,7 +382,7 @@ Friend Class clsAusdrücke
 
     Shadows Function IndexOf(ByVal Ausdruck As String) As Int32
         For i As Int32 = 0 To Count - 1
-            If String.Compare(Me(i).Ausdruck, Ausdruck, True) = 0 Then
+            If String.Compare(Me(i).Ausdruck, Ausdruck, StringComparison.OrdinalIgnoreCase) = 0 Then
                 Return i
             End If
         Next i
@@ -392,7 +391,7 @@ Friend Class clsAusdrücke
 
     Function IndexOfÜbersetzung(ByVal Übersetzung As String) As Int32
         For i As Int32 = 0 To Count - 1
-            If String.Compare(Me(i).Übersetzung, Übersetzung, True) = 0 AndAlso String.Compare(Me(i).Ausdruck, "sprachenname", True) <> 0 Then
+            If String.Compare(Me(i).Übersetzung, Übersetzung, StringComparison.OrdinalIgnoreCase) = 0 AndAlso String.Compare(Me(i).Ausdruck, "sprachenname", StringComparison.OrdinalIgnoreCase) <> 0 Then
                 Return i
             End If
         Next i
@@ -416,8 +415,14 @@ Public Class clsSprachen
     Inherits List(Of clsSprache)
 
     Shadows Function IndexOf(ByVal EnglishName As String, Optional ByVal BeachteGroßKlein As Boolean = True) As Int32
+        Dim comp As StringComparison
+        If BeachteGroßKlein Then
+            comp = StringComparison.Ordinal
+        Else
+            comp = StringComparison.OrdinalIgnoreCase
+        End If
         For i As Int32 = 0 To Me.Count - 1
-            If String.Compare(Me(i).EnglishName, EnglishName, Not BeachteGroßKlein) = 0 Then
+            If String.Compare(Me(i).EnglishName, EnglishName, comp) = 0 Then
                 Return i
             End If
         Next
@@ -425,14 +430,14 @@ Public Class clsSprachen
     End Function
 
     Overloads Sub Add(ByVal EnglishName As String, ByVal SprachName As String)
-        Dim tmp As New clsSprache() 
+        Dim tmp As New clsSprache()
         tmp.EnglishName = EnglishName
         tmp.SprachName = SprachName
         Add(tmp)
     End Sub
 
     Overloads Sub Add(ByVal EnglishName As String, ByVal SprachName As String, ByVal SprachText As String)
-        Dim tmp as New clsSprache() 
+        Dim tmp As New clsSprache()
         tmp.EnglishName = EnglishName
         tmp.SprachName = SprachName
         tmp.SprachText = SprachText
