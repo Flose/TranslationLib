@@ -10,11 +10,11 @@ Imports System.Runtime.InteropServices
 
 ' Die Werte der Assemblyattribute überprüfen
 
-<Assembly: AssemblyTitle("Sprache")> 
+<Assembly: AssemblyTitle("TranslationLib")> 
 <Assembly: AssemblyDescription("Programme übersetzen")> 
 <Assembly: AssemblyCompany("Flo & Seb Engineering")> 
-<Assembly: AssemblyProduct("dllSprache")> 
-<Assembly: AssemblyCopyright("© Flo & Seb Engineering 2007 - 2010")> 
+<Assembly: AssemblyProduct("TranslationLib")> 
+<Assembly: AssemblyCopyright("© Flo & Seb Engineering 2007 - 2012")> 
 <Assembly: AssemblyTrademark("")> 
 
 <Assembly: ComVisible(False)> 

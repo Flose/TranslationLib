@@ -7,8 +7,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{75824712-16D2-4E4D-A9FE-B52C4673AB38}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>dllSprache</RootNamespace>
-    <AssemblyName>dllSprache</AssemblyName>
+    <RootNamespace>FloseCode.TranslationLib</RootNamespace>
+    <AssemblyName>TranslationLib</AssemblyName>
     <MyType>Windows</MyType>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
