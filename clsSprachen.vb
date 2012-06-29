@@ -248,13 +248,13 @@
         If tmpControl Is Nothing Then
             Try
                 Dim type As String = Control.GetType.ToString
-                If String.Compare(type, "system.windows.forms.menuitem", StringComparison.OrdinalIgnoreCase) = 0 Then
+                If TypeOf Control Is System.Windows.Forms.MenuItem Then
                     Dim tmpMenuItem As Windows.Forms.MenuItem = DirectCast(Control, System.Windows.Forms.MenuItem)
                     tmp = ÜbersetzeControlTag(tmpMenuItem.Tag)
                     If tmp.Length > 0 Then
                         tmpMenuItem.Text = tmp
                     End If
-                ElseIf String.Compare(type, "system.windows.forms.toolstripmenuitem", StringComparison.OrdinalIgnoreCase) = 0 Then
+                ElseIf TypeOf Control Is System.Windows.Forms.ToolStripMenuItem Then
                     Dim tmpToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem = DirectCast(Control, System.Windows.Forms.ToolStripMenuItem)
                     tmp = ÜbersetzeControlTag(tmpToolStripMenuItem.Tag)
                     If tmp.Length > 0 Then
@@ -263,19 +263,19 @@
                     For i As Int32 = 0 To tmpToolStripMenuItem.DropDownItems.Count - 1
                         ÜbersetzeControl(tmpToolStripMenuItem.DropDownItems(i))
                     Next i
-                ElseIf String.Compare(type, "system.windows.forms.toolstripbutton", StringComparison.OrdinalIgnoreCase) = 0 Then
+                ElseIf TypeOf Control Is System.Windows.Forms.ToolStripButton Then
                     Dim tmpToolStripButton As System.Windows.Forms.ToolStripButton = DirectCast(Control, System.Windows.Forms.ToolStripButton)
                     tmp = ÜbersetzeControlTag(tmpToolStripButton.Tag)
                     If tmp.Length > 0 Then
                         tmpToolStripButton.Text = tmp
                     End If
-                ElseIf String.Compare(type, "system.windows.forms.columnheader", StringComparison.OrdinalIgnoreCase) = 0 Then
+                ElseIf TypeOf Control Is System.Windows.Forms.ColumnHeader Then
                     Dim tmpColumnHeader As System.Windows.Forms.ColumnHeader = DirectCast(Control, System.Windows.Forms.ColumnHeader)
                     tmp = ÜbersetzeControlTag(tmpColumnHeader.Tag)
                     If tmp.Length > 0 Then
                         tmpColumnHeader.Text = tmp
                     End If
-                ElseIf String.Compare(type, "system.windows.forms.listviewgroup", StringComparison.OrdinalIgnoreCase) = 0 Then
+                ElseIf TypeOf Control Is System.Windows.Forms.ListViewGroup Then
                     Dim tmpListViewGroup As System.Windows.Forms.ListViewGroup = DirectCast(Control, System.Windows.Forms.ListViewGroup)
                     tmp = ÜbersetzeControlTag(tmpListViewGroup.Tag)
                     If tmp.Length > 0 Then
@@ -295,7 +295,7 @@
                 End If
 
                 Dim type As String = Control.GetType.ToString
-                If String.Compare(type, "system.windows.forms.listview", StringComparison.OrdinalIgnoreCase) = 0 Then
+                If TypeOf Control Is System.Windows.Forms.ListView Then
                     Dim tmpListView As System.Windows.Forms.ListView = DirectCast(Control, System.Windows.Forms.ListView)
                     For Each column As System.Windows.Forms.ColumnHeader In tmpListView.Columns
                         ÜbersetzeControl(column)
@@ -303,15 +303,15 @@
                     For Each group As System.Windows.Forms.ListViewGroup In tmpListView.Groups
                         ÜbersetzeControl(group)
                     Next
-                ElseIf String.Compare(type, "system.windows.forms.toolstrip", StringComparison.OrdinalIgnoreCase) = 0 Then
+                ElseIf TypeOf Control Is System.Windows.Forms.ToolStrip Then
                     For Each item As System.Windows.Forms.ToolStripItem In DirectCast(Control, System.Windows.Forms.ToolStrip).Items
                         ÜbersetzeControl(item)
                     Next
-                ElseIf String.Compare(type, "system.windows.forms.menustrip", StringComparison.OrdinalIgnoreCase) = 0 Then
+                ElseIf TypeOf Control Is System.Windows.Forms.MenuStrip Then
                     For Each item As System.Windows.Forms.ToolStripItem In DirectCast(Control, System.Windows.Forms.MenuStrip).Items
                         ÜbersetzeControl(item)
                     Next
-                ElseIf String.Compare(type, "system.windows.forms.contextmenustrip", StringComparison.OrdinalIgnoreCase) = 0 Then
+                ElseIf TypeOf Control Is System.Windows.Forms.ContextMenuStrip Then
                     For Each item As System.Windows.Forms.ToolStripItem In DirectCast(Control, System.Windows.Forms.ContextMenuStrip).Items
                         ÜbersetzeControl(item)
                     Next
