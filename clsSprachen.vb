@@ -140,7 +140,7 @@
         End If
     End Sub
 
-    Sub New()
+    Private Sub New()
     End Sub
 
     ReadOnly Property RückÜbersetzen(ByVal Übersetzung As String) As String
