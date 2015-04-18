@@ -243,6 +243,7 @@
     End Property
 
     Sub ÜbersetzeControl(ByVal Control As Object)
+        If Control Is Nothing Then Return
         Dim tmpControl As System.Windows.Forms.Control = TryCast(Control, System.Windows.Forms.Control)
         Dim tmp As String
         If tmpControl Is Nothing Then
@@ -303,6 +304,7 @@
                     For Each group As System.Windows.Forms.ListViewGroup In tmpListView.Groups
                         ÜbersetzeControl(group)
                     Next
+                    ÜbersetzeControl(tmpListView.ContextMenuStrip)
                 ElseIf TypeOf Control Is System.Windows.Forms.ToolStrip Then
                     For Each item As System.Windows.Forms.ToolStripItem In DirectCast(Control, System.Windows.Forms.ToolStrip).Items
                         ÜbersetzeControl(item)
