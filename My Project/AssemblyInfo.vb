@@ -14,7 +14,7 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyDescription("Programme übersetzen")> 
 <Assembly: AssemblyCompany("Flo & Seb Engineering")> 
 <Assembly: AssemblyProduct("TranslationLib")> 
-<Assembly: AssemblyCopyright("© Flo & Seb Engineering 2007 - 2012")> 
+<Assembly: AssemblyCopyright("© Flo & Seb Engineering 2007 - 2015")> 
 <Assembly: AssemblyTrademark("")> 
 
 <Assembly: ComVisible(False)> 
@@ -33,7 +33,7 @@ Imports System.Runtime.InteropServices
 ' übernehmen, indem Sie "*" eingeben:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("1.5.3.0")> 
-<Assembly: AssemblyFileVersion("1.5.3.0")> 
+<Assembly: AssemblyVersion("1.5.4.0")> 
+<Assembly: AssemblyFileVersion("1.5.4.0")> 
 
 <Assembly: NeutralResourcesLanguageAttribute("de-DE")> 
