@@ -1,3 +1,10 @@
 /obj/
 /bin/
 *.suo
+
+# Ignore NuGet Packages
+*.nupkg
+# Ignore the packages folder
+**/packages/*
+# except build/, which is used as an MSBuild target.
+!**/packages/build/

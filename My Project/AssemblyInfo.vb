@@ -10,11 +10,11 @@ Imports System.Runtime.InteropServices
 
 ' Die Werte der Assemblyattribute überprüfen
 
-<Assembly: AssemblyTitle("TranslationLib")> 
-<Assembly: AssemblyDescription("Programme übersetzen")> 
-<Assembly: AssemblyCompany("Flo & Seb Engineering")> 
-<Assembly: AssemblyProduct("TranslationLib")> 
-<Assembly: AssemblyCopyright("© Flo & Seb Engineering 2007 - 2015")> 
+<Assembly: AssemblyTitle("TranslationLib")>
+<Assembly: AssemblyDescription("Translate programs")>
+<Assembly: AssemblyCompany("Flose")>
+<Assembly: AssemblyProduct("TranslationLib")>
+<Assembly: AssemblyCopyright("© Flose 2007 - 2016")>
 <Assembly: AssemblyTrademark("")> 
 
 <Assembly: ComVisible(False)> 
@@ -34,6 +34,6 @@ Imports System.Runtime.InteropServices
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
 <Assembly: AssemblyVersion("1.5.4.0")> 
-<Assembly: AssemblyFileVersion("1.5.4.0")> 
+<Assembly: AssemblyFileVersion("1.5.4.0")>
 
-<Assembly: NeutralResourcesLanguageAttribute("de-DE")> 
+<Assembly: NeutralResourcesLanguage("en")>
