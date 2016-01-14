@@ -5,13 +5,10 @@
     Private languagesDirectory As String
     Private fallbackTranslation As Translation
 
-    Public Property CurrentLanguage As String
+    Public ReadOnly Property CurrentLanguage As String
         Get
             Return _currentLanguage
         End Get
-        Private Set(value As String)
-            _currentLanguage = value
-        End Set
     End Property
 
 #If DEBUG Then
@@ -29,18 +26,17 @@
         If IO.File.Exists(Sprachdatei) Then
             Try
                 Using Reader As New IO.StreamReader(Sprachdatei, True)
-                    Reader.ReadLine() 'Version
                     Return Load(languageName, Reader)
                 End Using
             Catch
             End Try
         End If
 
-        If String.IsNullOrEmpty(lang.SprachText) Then
+        If String.IsNullOrEmpty(lang.LanguageText) Then
             Return False
         End If
 
-        Return Load(languageName, lang.SprachText)
+        Return Load(languageName, lang.LanguageText)
     End Function
 
     Private Function Load(languageName As String, languageText As String) As Boolean
@@ -53,51 +49,45 @@
         NichtVerwendeteAusdrücke.Clear()
         FehlendeAusdrücke.Clear()
 #End If
-        Try
-            Do
-                Dim line = reader.ReadLine()
-                If line Is Nothing Then
-                    Exit Do
-                End If
-                If line.Length = 0 OrElse line(0) = "'"c Then
-                    Continue Do
-                End If
+        reader.ReadLine() 'Version
+        Do
+            Dim line = reader.ReadLine()
+            If line Is Nothing Then
+                Exit Do
+            End If
+            If line.Length = 0 OrElse line(0) = "'"c Then
+                Continue Do
+            End If
 
-                Dim separatorIndex = line.IndexOf("="c)
-                If separatorIndex = -1 Then
-                    Continue Do
-                End If
-                Dim idPart = line.Substring(0, separatorIndex)
-                Dim translationPart = line.Substring(separatorIndex + 1)
-                If Not String.IsNullOrEmpty(idPart) AndAlso Not String.IsNullOrEmpty(translationPart) Then
-                    currentTranslations.Add(idPart.ToLowerInvariant, New OneTranslation(idPart, translationPart.Replace("\n\n", Environment.NewLine)))
-                End If
+            Dim separatorIndex = line.IndexOf("="c)
+            If separatorIndex = -1 Then
+                Continue Do
+            End If
+            Dim idPart = line.Substring(0, separatorIndex)
+            Dim translationPart = line.Substring(separatorIndex + 1)
+            If Not String.IsNullOrEmpty(idPart) AndAlso Not String.IsNullOrEmpty(translationPart) AndAlso Not currentTranslations.ContainsKey(idPart.ToLowerInvariant) Then
+                currentTranslations.Add(idPart.ToLowerInvariant, New OneTranslation(idPart, translationPart.Replace("\n\n", Environment.NewLine)))
+            End If
 #If DEBUG Then
-                NichtVerwendeteAusdrücke.Add(idPart)
+            NichtVerwendeteAusdrücke.Add(idPart)
 #End If
-            Loop
-        Catch
-        End Try
+        Loop
+
         If currentTranslations.Count > 0 Then
-            CurrentLanguage = languageName
+            _currentLanguage = languageName
             Return True
         Else
             Return False
         End If
     End Function
 
-    Private Sub AddLanguage(ByVal EnglishName As String, ByVal SprachName As String)
-        Dim lang As New Language()
-        lang.EnglishName = EnglishName
-        lang.SprachName = SprachName
+    Private Sub AddLanguage(englishName As String, translatedName As String)
+        Dim lang As New Language(englishName, translatedName)
         languages.Add(lang.EnglishName.ToLowerInvariant, lang)
     End Sub
 
-    Public Sub AddLanguage(ByVal EnglishName As String, ByVal SprachName As String, ByVal SprachText As String)
-        Dim lang As New Language()
-        lang.EnglishName = EnglishName
-        lang.SprachName = SprachName
-        lang.SprachText = SprachText
+    Public Sub AddLanguage(englishName As String, translatedName As String, languageText As String)
+        Dim lang As New Language(englishName, translatedName, languageText)
         languages.Add(lang.EnglishName.ToLowerInvariant, lang)
     End Sub
 
@@ -138,50 +128,57 @@
         Return String.Empty
     End Function
 
-    Private Shared Function ÜberprüfeDatei(ByVal SprachDatei As String, Optional ByRef SprachenName As String = "") As Boolean
-        If Not IO.File.Exists(SprachDatei) Then
-            Return False
+    Private Shared Function GetTranslatedNameFromFile(file As String) As String
+        If Not IO.File.Exists(file) Then
+            Return Nothing
         End If
         Try
-            Using Reader As New IO.StreamReader(SprachDatei, True)
-                Reader.ReadLine()
-                Dim tmp As Int32, tmpstring As String
-                Do Until Reader.Peek = -1
-                    Try
-                        tmpstring = Reader.ReadLine
-                        If tmpstring.Length > 0 AndAlso tmpstring(0) <> "'"c Then
-                            tmp = tmpstring.IndexOf("="c)
-                            If String.Compare(tmpstring.Substring(0, tmp).Trim, "sprachenname", StringComparison.OrdinalIgnoreCase) = 0 Then
-                                SprachenName = tmpstring.Substring(tmp + 1)
-                                Return True
-                            End If
-                        End If
-                    Catch
-                    End Try
+            Using Reader As New IO.StreamReader(file, True)
+                Reader.ReadLine() ' Version
+                Do
+                    Dim line = Reader.ReadLine
+                    If line Is Nothing Then
+                        Exit Do
+                    End If
+                    If line.Length = 0 OrElse line(0) = "'"c Then
+                        Continue Do
+                    End If
+
+                    Dim separatorIndex = line.IndexOf("="c)
+                    If separatorIndex = -1 Then
+                        Continue Do
+                    End If
+
+                    Dim idPart = line.Substring(0, separatorIndex)
+                    If String.Compare(idPart, "sprachenname", StringComparison.OrdinalIgnoreCase) = 0 Then
+                        Return line.Substring(separatorIndex + 1)
+                    End If
                 Loop
             End Using
-        Catch
+        Catch ex As Exception
         End Try
-        Return False
+        Return Nothing
     End Function
 
-    Public Sub New(ByVal Directory As String, ByVal StandardÜbersetzenText As String)
-        languagesDirectory = Directory
-        If IO.Directory.Exists(languagesDirectory) Then
+    Public Sub New(ByVal languagesDirectory As String, ByVal fallbackTranslationText As String)
+        Me.languagesDirectory = languagesDirectory
+        If IO.Directory.Exists(Me.languagesDirectory) Then
             'Sprachdateien finden
-            For Each File As String In IO.Directory.GetFiles(languagesDirectory, "*.lng", IO.SearchOption.TopDirectoryOnly)
-                Dim langName As String = String.Empty
-                If ÜberprüfeDatei(File, langName) Then
-                    Dim name = IO.Path.GetFileNameWithoutExtension(File)
-                    If Not ContainsLanguage(name) Then
-                        AddLanguage(name, langName)
-                    End If
+            For Each file As String In IO.Directory.GetFiles(Me.languagesDirectory, "*.lng", IO.SearchOption.TopDirectoryOnly)
+                Dim name = IO.Path.GetFileNameWithoutExtension(file)
+                If ContainsLanguage(name) Then
+                    Continue For
+                End If
+
+                Dim langName As String = GetTranslatedNameFromFile(file)
+                If langName IsNot Nothing Then
+                    AddLanguage(name, langName)
                 End If
             Next
         End If
-        fallbackTranslation = New Translation()
-        If StandardÜbersetzenText.Trim.Length > 0 Then
-            fallbackTranslation.Load("Standard", StandardÜbersetzenText)
+        If fallbackTranslationText.Trim.Length > 0 Then
+            fallbackTranslation = New Translation()
+            fallbackTranslation.Load("Fallback", fallbackTranslationText)
         End If
     End Sub
 
@@ -198,7 +195,7 @@
         Return Nothing
     End Function
 
-    Public Function ReverseTranslate(translation As String, Optional Standard As String = "") As String
+    Public Function ReverseTranslate(translation As String, Optional defaultValue As String = "") As String
         Dim id = GetIdOfTranslation(currentTranslations, translation)
         If id IsNot Nothing Then
 #If DEBUG Then
@@ -207,12 +204,12 @@
             Return id
         End If
 
-        id = GetIdOfTranslation(fallbackTranslation.currentTranslations, translation)
+        id = GetIdOfTranslation(fallbackTranslation?.currentTranslations, translation)
         If id IsNot Nothing Then
             Return id
         End If
 
-        Return Standard
+        Return defaultValue
     End Function
 
     Public Function Translate(id As String) As String
@@ -230,37 +227,36 @@
         If Not FehlendeAusdrücke.Contains(id) Then FehlendeAusdrücke.Add(id)
 #End If
 
-        'schauen ob in standard ist
-        If fallbackTranslation.currentTranslations.TryGetValue(id.ToLowerInvariant, result) Then
+        If fallbackTranslation IsNot Nothing AndAlso fallbackTranslation.currentTranslations.TryGetValue(id.ToLowerInvariant, result) Then
             Return result.Translation
         End If
 
         Return id
     End Function
 
-    Public Function Translate(id As String, ByVal ParamArray Args() As String) As String
+    Public Function Translate(id As String, ByVal ParamArray args() As String) As String
         Dim result As String = Translate(id)
 
-        If Args Is Nothing OrElse Args.Length = 0 Then
+        If args Is Nothing OrElse args.Length = 0 Then
             Return result
         End If
-        For i = 0 To Args.GetUpperBound(0)
-            If Args(i) Is Nothing Then
-                Args(i) = String.Empty
-            ElseIf Args(i).Length >= 3 AndAlso Args(i).Substring(0, 2) = "##" AndAlso IsNumeric(Args(i).Substring(2)) Then
-                Args(i) = GetEnumerationOf(CInt(Args(i).Substring(2)))
+        For i = 0 To args.GetUpperBound(0)
+            If args(i) Is Nothing Then
+                args(i) = String.Empty
+            ElseIf args(i).Length >= 3 AndAlso args(i).Substring(0, 2) = "##" AndAlso IsNumeric(args(i).Substring(2)) Then
+                args(i) = GetEnumerationOf(CInt(args(i).Substring(2)))
             End If
         Next i
 
         Do
             Try
-                Return String.Format(result, Args)
+                Return String.Format(result, args)
             Catch ex As FormatException
-                If Args.Length = 0 Then
+                If args.Length = 0 Then
                     Return result
                 End If
                 ' Reduce args length by one
-                ReDim Preserve Args(Args.Length)
+                ReDim Preserve args(args.Length)
             End Try
         Loop
     End Function
@@ -277,13 +273,13 @@
             Try
                 If TypeOf control Is System.Windows.Forms.MenuItem Then
                     Dim tmpMenuItem As Windows.Forms.MenuItem = DirectCast(control, System.Windows.Forms.MenuItem)
-                    tmp = ÜbersetzeControlTag(tmpMenuItem.Tag)
+                    tmp = TranslateControlTag(tmpMenuItem.Tag)
                     If tmp.Length > 0 Then
                         tmpMenuItem.Text = tmp
                     End If
                 ElseIf TypeOf control Is System.Windows.Forms.ToolStripMenuItem Then
                     Dim tmpToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem = DirectCast(control, System.Windows.Forms.ToolStripMenuItem)
-                    tmp = ÜbersetzeControlTag(tmpToolStripMenuItem.Tag)
+                    tmp = TranslateControlTag(tmpToolStripMenuItem.Tag)
                     If tmp.Length > 0 Then
                         tmpToolStripMenuItem.Text = tmp
                     End If
@@ -292,19 +288,19 @@
                     Next i
                 ElseIf TypeOf control Is System.Windows.Forms.ToolStripButton Then
                     Dim tmpToolStripButton As System.Windows.Forms.ToolStripButton = DirectCast(control, System.Windows.Forms.ToolStripButton)
-                    tmp = ÜbersetzeControlTag(tmpToolStripButton.Tag)
+                    tmp = TranslateControlTag(tmpToolStripButton.Tag)
                     If tmp.Length > 0 Then
                         tmpToolStripButton.Text = tmp
                     End If
                 ElseIf TypeOf control Is System.Windows.Forms.ColumnHeader Then
                     Dim tmpColumnHeader As System.Windows.Forms.ColumnHeader = DirectCast(control, System.Windows.Forms.ColumnHeader)
-                    tmp = ÜbersetzeControlTag(tmpColumnHeader.Tag)
+                    tmp = TranslateControlTag(tmpColumnHeader.Tag)
                     If tmp.Length > 0 Then
                         tmpColumnHeader.Text = tmp
                     End If
                 ElseIf TypeOf control Is System.Windows.Forms.ListViewGroup Then
                     Dim tmpListViewGroup As System.Windows.Forms.ListViewGroup = DirectCast(control, System.Windows.Forms.ListViewGroup)
-                    tmp = ÜbersetzeControlTag(tmpListViewGroup.Tag)
+                    tmp = TranslateControlTag(tmpListViewGroup.Tag)
                     If tmp.Length > 0 Then
                         tmpListViewGroup.Header = tmp
                     End If
@@ -316,7 +312,7 @@
             End Try
         Else
             Try
-                tmp = ÜbersetzeControlTag(tmpControl.Tag)
+                tmp = TranslateControlTag(tmpControl.Tag)
                 If tmp.Length > 0 Then
                     tmpControl.Text = tmp
                 End If
@@ -355,8 +351,8 @@
         End If
     End Sub
 
-    Private Function ÜbersetzeControlTag(ByVal Tag As Object) As String
-        Dim tmpTag As String = TryCast(Tag, String)
+    Private Function TranslateControlTag(ByVal tag As Object) As String
+        Dim tmpTag As String = TryCast(tag, String)
         If String.IsNullOrEmpty(tmpTag) Then
             Return String.Empty
         End If
@@ -423,24 +419,29 @@ End Class
 
 Public Class Language
     Private _englishName As String
-    Private _sprachName As String
-    Friend SprachText As String
+    Private _translatedName As String
+    Friend LanguageText As String
 
-    Public Property EnglishName As String
+    Public ReadOnly Property EnglishName As String
         Get
             Return _englishName
         End Get
-        Friend Set(value As String)
-            _englishName = value
-        End Set
     End Property
 
-    Public Property SprachName As String
+    Public ReadOnly Property TranslatedName As String
         Get
-            Return _sprachName
+            Return _translatedName
         End Get
-        Friend Set(value As String)
-            _sprachName = value
-        End Set
     End Property
+
+    Friend Sub New(englishName As String, translatedName As String)
+        Me._englishName = englishName
+        Me._translatedName = translatedName
+    End Sub
+
+    Friend Sub New(englishName As String, translatedName As String, languageText As String)
+        Me._englishName = englishName
+        Me._translatedName = translatedName
+        Me.LanguageText = languageText
+    End Sub
 End Class
