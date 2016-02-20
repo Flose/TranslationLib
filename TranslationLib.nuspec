@@ -13,4 +13,8 @@
     <copyright>Copyright Flose 2016</copyright>
     <tags>translation library</tags>
   </metadata>
+  <files>
+    <file src="bin\Release20\$id$.dll" target="lib\net20\" />
+    <file src="bin\Release40\$id$.dll" target="lib\net40\" />
+  </files>
 </package>
