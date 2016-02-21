@@ -15,9 +15,10 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyCompany("Flose")>
 <Assembly: AssemblyProduct("TranslationLib")>
 <Assembly: AssemblyCopyright("© Flose 2007 - 2016")>
-<Assembly: AssemblyTrademark("")> 
+<Assembly: AssemblyTrademark("")>
 
-<Assembly: ComVisible(False)> 
+<Assembly: ComVisible(False)>
+<Assembly: CLSCompliant(True)>
 
 'Die folgende GUID bestimmt die ID der Typbibliothek, wenn dieses Projekt für COM verfügbar gemacht wird
 <Assembly: Guid("dadc4d91-a656-4e88-ab69-14478d557f96")>
