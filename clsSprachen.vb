@@ -113,7 +113,7 @@
 
         'Wenn zu uberprüfende Sprache nicht verfügbar ist
         'system sprache finden
-        languageName = My.Application.Culture.EnglishName
+        languageName = Threading.Thread.CurrentThread.CurrentCulture.EnglishName
         languageName = languageName.Substring(0, languageName.IndexOf(" (", StringComparison.Ordinal))
 
         'schauen ob systemsprache verfügbar ist
@@ -243,8 +243,11 @@
         For i = 0 To args.GetUpperBound(0)
             If args(i) Is Nothing Then
                 args(i) = String.Empty
-            ElseIf args(i).Length >= 3 AndAlso args(i).Substring(0, 2) = "##" AndAlso IsNumeric(args(i).Substring(2)) Then
-                args(i) = GetEnumerationOf(CInt(args(i).Substring(2)))
+            ElseIf args(i).Length >= 3 AndAlso args(i).Substring(0, 2) = "##" Then
+                Dim number As Integer
+                If Integer.TryParse(args(i).Substring(2), number) Then
+                    args(i) = GetEnumerationOf(number)
+                End If
             End If
         Next i
 
