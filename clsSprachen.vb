@@ -11,6 +11,8 @@
         End Get
     End Property
 
+    Public Event TranslationChanged(sender As Object, e As TranslationChangedEventArgs)
+
 #If DEBUG Then
     Dim NichtVerwendeteAusdrücke As New List(Of String)
     Dim FehlendeAusdrücke As New List(Of String)
@@ -75,12 +77,10 @@
 #End If
         Loop
 
-        If currentTranslations.Count > 0 Then
-            _currentLanguage = languageName
-            Return True
-        Else
-            Return False
-        End If
+        _currentLanguage = languageName
+        RaiseEvent TranslationChanged(Me, New TranslationChangedEventArgs(languageName))
+
+        Return currentTranslations.Count > 0
     End Function
 
     Private Sub AddLanguage(englishName As String, translatedName As String)
