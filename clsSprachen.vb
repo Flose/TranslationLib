@@ -22,14 +22,16 @@
         End If
 
         Dim lang = GetLanguage(languageName)
-        Dim Sprachdatei As String = IO.Path.Combine(languagesDirectory, languageName & ".lng")
-        If IO.File.Exists(Sprachdatei) Then
-            Try
-                Using Reader As New IO.StreamReader(Sprachdatei, True)
-                    Return Load(languageName, Reader)
-                End Using
-            Catch
-            End Try
+        If languagesDirectory IsNot Nothing Then
+            Dim Sprachdatei As String = IO.Path.Combine(languagesDirectory, languageName & ".lng")
+            If IO.File.Exists(Sprachdatei) Then
+                Try
+                    Using Reader As New IO.StreamReader(Sprachdatei, True)
+                        Return Load(languageName, Reader)
+                    End Using
+                Catch
+                End Try
+            End If
         End If
 
         If String.IsNullOrEmpty(lang.LanguageText) Then
@@ -162,7 +164,7 @@
 
     Public Sub New(ByVal languagesDirectory As String, ByVal fallbackTranslationText As String)
         Me.languagesDirectory = languagesDirectory
-        If IO.Directory.Exists(Me.languagesDirectory) Then
+        If Me.languagesDirectory IsNot Nothing AndAlso IO.Directory.Exists(Me.languagesDirectory) Then
             'Sprachdateien finden
             For Each file As String In IO.Directory.GetFiles(Me.languagesDirectory, "*.lng", IO.SearchOption.TopDirectoryOnly)
                 Dim name = IO.Path.GetFileNameWithoutExtension(file)
@@ -176,7 +178,7 @@
                 End If
             Next
         End If
-        If fallbackTranslationText.Trim.Length > 0 Then
+        If Not String.IsNullOrEmpty(fallbackTranslationText) Then
             fallbackTranslation = New Translation()
             fallbackTranslation.Load("Fallback", fallbackTranslationText)
         End If
