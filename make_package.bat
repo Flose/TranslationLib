@@ -6,4 +6,4 @@ FOR %%C IN (Release20 Release40) DO (
  if errorlevel 1 goto :eof
 )
 
-nuget pack %PATH_SOURCE_PROJ% -Prop Configuration=Release20 -IncludeReferencedProjects -Verbosity detailed
+nuget pack %PATH_SOURCE_PROJ% -Prop Configuration=Release20 -Symbols -IncludeReferencedProjects -Verbosity detailed
