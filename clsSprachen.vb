@@ -109,20 +109,20 @@
 
     Public Function CheckLanguageName(languageName As String) As String
         If ContainsLanguage(languageName) Then
-            'sprache ist verfügbar
+            ' Language is available
             Return GetLanguage(languageName).EnglishName
         End If
 
-        'Wenn zu uberprüfende Sprache nicht verfügbar ist
-        'system sprache finden
+        ' Requested language doesn't exist, try system language
         languageName = Threading.Thread.CurrentThread.CurrentCulture.EnglishName
         languageName = languageName.Substring(0, languageName.IndexOf(" (", StringComparison.Ordinal))
 
-        'schauen ob systemsprache verfügbar ist
         If ContainsLanguage(languageName) Then
+            ' System language is available
             Return GetLanguage(languageName).EnglishName
         End If
 
+        ' Fallback to english
         If ContainsLanguage("English") Then
             Return GetLanguage(languageName).EnglishName
         End If
@@ -165,7 +165,7 @@
     Public Sub New(ByVal languagesDirectory As String, ByVal fallbackTranslationText As String)
         Me.languagesDirectory = languagesDirectory
         If Me.languagesDirectory IsNot Nothing AndAlso IO.Directory.Exists(Me.languagesDirectory) Then
-            'Sprachdateien finden
+            ' Find language files
             For Each file As String In IO.Directory.GetFiles(Me.languagesDirectory, "*.lng", IO.SearchOption.TopDirectoryOnly)
                 Dim name = IO.Path.GetFileNameWithoutExtension(file)
                 If ContainsLanguage(name) Then
