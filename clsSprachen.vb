@@ -123,7 +123,8 @@
         End If
 
         ' Fallback to english
-        If ContainsLanguage("English") Then
+        languageName = "English"
+        If ContainsLanguage(languageName) Then
             Return GetLanguage(languageName).EnglishName
         End If
 
