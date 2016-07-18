@@ -19,8 +19,8 @@ System.Windows.Forms.MessageBox.Show(t.Translate("SchoolText", "👍"))
 ' Translate a windows form control
 ' The id of the translation string must be set in the control's Tag value
 someWindowsFormControl.Tag = "School"
-' Arguments are also possible, just appended and separated by a comma
-someWindowsFormControl.Tag = "👍,School"
+' Arguments are also possible, just prepended and separated by a comma
+someWindowsFormControl.Tag = "👍,SchoolText"
 t.TranslateControl(someWindowsFormControl)
 ```
 
