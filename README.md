@@ -6,7 +6,7 @@ The library is available on NuGet: https://www.nuget.org/packages/FloseCode.Tran
 
 ## Example in VB.Net
 ```vb.net
-Dim t As New FloseCode.TranslationLib.Translation(traslationPath, fallbackTranslationText)
+Dim t As New FloseCode.TranslationLib.Translation(translationPath, fallbackTranslationText)
 
 Dim availableLanguage = t.GetLanguagesSorted()
 
