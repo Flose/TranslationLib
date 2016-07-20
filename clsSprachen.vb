@@ -103,7 +103,7 @@
 
     Public Function GetLanguagesSorted() As IList(Of Language)
         Dim result As New List(Of Language)(languages.Values)
-        result.Sort(New LanguageNameComparer)
+        result.Sort(Function (x,y) String.CompareOrdinal(x.EnglishName, y.EnglishName))
         Return result
     End Function
 
@@ -230,7 +230,7 @@
         If Not FehlendeAusdrücke.Contains(id) Then FehlendeAusdrücke.Add(id)
 #End If
 
-        If fallbackTranslation IsNot Nothing AndAlso fallbackTranslation.currentTranslations.TryGetValue(id.ToLowerInvariant, result) Then
+        If fallbackTranslation?.currentTranslations.TryGetValue(id.ToLowerInvariant, result) Then
             Return result.Translation
         End If
 
@@ -412,14 +412,6 @@
             Me.Id = id
             Me.Translation = translation
         End Sub
-    End Class
-
-    Private Class LanguageNameComparer
-        Implements IComparer(Of Language)
-
-        Public Function Compare(x As Language, y As Language) As Integer Implements IComparer(Of Language).Compare
-            Return String.CompareOrdinal(x.EnglishName, y.EnglishName)
-        End Function
     End Class
 End Class
 
